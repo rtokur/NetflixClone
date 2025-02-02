@@ -27,6 +27,7 @@ class DetailVC: UIViewController {
         return view2
     }()
     
+    
     let playButton : UIButton = {
         let playButton = UIButton()
         playButton.backgroundColor = .white.withAlphaComponent(0.9)
