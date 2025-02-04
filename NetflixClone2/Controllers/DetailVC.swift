@@ -27,14 +27,13 @@ class DetailVC: UIViewController {
         return view2
     }()
     
-    
     let playButton : UIButton = {
         let playButton = UIButton()
         playButton.backgroundColor = .white.withAlphaComponent(0.9)
         playButton.setImage(UIImage(systemName: "play.fill"),for: UIControl.State.normal)
         playButton.tintColor = .black
         playButton.layer.cornerRadius = 8
-        playButton.addTarget(self, action: #selector(playButtonAction), for: .touchUpInside)
+        playButton.addTarget(DetailVC.self, action: #selector(playButtonAction), for: .touchUpInside)
         return playButton
     }()
     
@@ -81,11 +80,9 @@ class DetailVC: UIViewController {
     
     let favoriteButton: UIButton = {
         let button = UIButton()
-        button.backgroundColor = .red
-        button.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+        button.backgroundColor = .systemBackground
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.tintColor = .label
-        button.setTitle("Favorite", for: .normal)
-        button.setTitleColor(.label, for: .normal)
         return button
     }()
     
@@ -127,20 +124,59 @@ class DetailVC: UIViewController {
         runtimeLabel.textAlignment = .left
         return runtimeLabel
     }()
+    
+    let seasonButton: UIButton = {
+        let button = UIButton()
+        button.setTitle("1. Season", for: .normal)
+        button.backgroundColor = .systemGray3
+        button.setTitleColor(.lightGray, for: .normal)
+        button.layer.cornerRadius = 5
+        return button
+    }()
+    
+    
+    let episodeLabel : UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.textAlignment = .left
+        label.font = .boldSystemFont(ofSize: 14)
+        return label
+    }()
+    
+    let episodeCollectionView : UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: 360, height: 196)
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .systemBackground
+        collectionView.showsVerticalScrollIndicator = false
+        return collectionView
+    }()
     // MARK: - Empty Objects
     var movie : Movie?
     var serie : Serie?
     var detail : Detail?
-    var genres : [Genre]?
+    var genres : [Genre]? = []
+    var episode : [Episode]? = []
+    var menuChildren : [UIMenuElement] = []
+    let actionClosure = { (action : UIAction) in
+        print(action.title)
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
+        menuChildren.append(UIAction(title: "1. Season", handler: actionClosure))
         view.backgroundColor = .systemBackground
         setupViews()
         setupConstraints()
         getData()
+        registerCells()
         // Do any additional setup after loading the view.
     }
+
     // MARK: - Make call for movie or serie detail from API
     func getData(){
         if let movieId = movie?.id {
@@ -163,6 +199,7 @@ class DetailVC: UIViewController {
         else if let serieId = serie?.id {
             Task {
                 detail = try await connection.getSerieDetail(serieId: serieId)
+                episode = try await connection.getEpisodeDetail(serieId: serieId, seasonNumber: 1)
                 if let numberOfSeasons = detail?.numberOfSeasons, numberOfSeasons != 1 {
                     runtimeLabel.text = "\(numberOfSeasons) Seasons"
                     if let genres2 = detail?.genres {
@@ -173,6 +210,12 @@ class DetailVC: UIViewController {
                         }
                         genresLabel.text = "\(genresName.joined(separator: " • "))"
                     }
+                    menuChildren.removeAll(keepingCapacity: true)
+                    for season in 1..<(numberOfSeasons+1) {
+                        menuChildren.append(UIAction(title: "\(season). Season", handler: actionClosure))
+                    }
+                    seasonButton.menu = UIMenu(options: .displayInline, children: menuChildren)
+                    episodeCollectionView.reloadData()
 
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
                     runtimeLabel.text = "\(numberOfEpisodes) Episodes"
@@ -184,11 +227,17 @@ class DetailVC: UIViewController {
                         }
                         genresLabel.text = "\(genresName.joined(separator: " • "))"
                     }
-                    
+                    episodeLabel.text = "Episodes"
+                    episodeCollectionView.reloadData()
                 }
             }
         }
     }
+    //MARK: -Register Cell for loading
+    private func registerCells() {
+        episodeCollectionView.register(EpisodesCollectionViewCell.self, forCellWithReuseIdentifier: "EpisodesCollectionViewCell")
+    }
+    
     // MARK: - Setup Views
     func setupViews(){
         view.addSubview(scrollView)
@@ -252,6 +301,16 @@ class DetailVC: UIViewController {
         
         stackView.addArrangedSubview(favoriteButton)
         
+        stackView.addArrangedSubview(episodeLabel)
+        
+        seasonButton.showsMenuAsPrimaryAction = true
+        seasonButton.changesSelectionAsPrimaryAction = true
+        stackView.addArrangedSubview(seasonButton)
+        
+        episodeCollectionView.delegate = self
+        episodeCollectionView.dataSource = self
+        stackView.addArrangedSubview(episodeCollectionView)
+        
         view.addSubview(activityIndicator)
     }
     
@@ -312,10 +371,47 @@ class DetailVC: UIViewController {
         }
         favoriteButton.snp.makeConstraints { make in
             make.height.equalTo(60)
-            make.width.equalTo(stackView).dividedBy(3)
+            make.width.equalTo(stackView).dividedBy(5.5)
         }
-        
+        episodeLabel.snp.makeConstraints { make in
+            make.height.equalTo(15)
+        }
+        seasonButton.snp.makeConstraints { make in
+            make.height.equalTo(30)
+            make.width.equalTo(70)
+        }
+        episodeCollectionView.snp.makeConstraints { make in
+            make.height.equalTo(200)
+        }
     }
 
 }
+// MARK: - CollectionViewDelegate and DataSource Methods
+extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return episode?.count ?? 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
+        let episod = episode?[indexPath.row]
 
+        if let url = episod?.stillURL {
+            cell.imageVieww.kf.setImage(with: url)
+            print(url)
+        }
+        
+        let name = episod?.name
+        let runtime = episod?.runtime
+        let overview = episod?.overview
+        
+        cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
+        cell.runtimeLabel.text = "\(runtime ?? 0) min."
+        cell.overview.text = "\(overview ?? "")"
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(episode?[indexPath.row].name,"bölüm")
+    }
+}

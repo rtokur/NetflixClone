@@ -85,10 +85,10 @@ class HomeVC: UIViewController {
         return activityIndicator
     }()
     
-    var popularMovies: [Movie] = []
+    private lazy var popularMovies: [Movie] = []
     private lazy var topRated: [Movie] = []
     private lazy var upComing: [Movie] = []
-    var popularSeries: [Serie] = []
+    private lazy var popularSeries: [Serie] = []
     
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
@@ -287,7 +287,6 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
             }
             self.present(dVC, animated: true, completion: nil)
         }
-        
     }
     
 }
