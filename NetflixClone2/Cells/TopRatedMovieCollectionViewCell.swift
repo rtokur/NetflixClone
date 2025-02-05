@@ -14,16 +14,23 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
         let posterImageView2 = UIImageView()
         posterImageView2.contentMode = .scaleAspectFill
         posterImageView2.layer.cornerRadius = 8
+        posterImageView2.backgroundColor = .purple
         posterImageView2.clipsToBounds = true
         return posterImageView2
     }()
     
-    let voteLabel : UILabel = {
-        let voteLabel = UILabel()
-        voteLabel.textColor = .label
-        voteLabel.font = .italicSystemFont(ofSize: 15)
-        voteLabel.textAlignment = .center
-        return voteLabel
+    let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        return stackView
+    }()
+    
+    let numberLabel : UILabel = {
+        let label = UILabel()
+        label.textColor = .label
+        label.textAlignment = .center
+        label.font = .boldSystemFont(ofSize: 90)
+        return label
     }()
     
     override init (frame: CGRect) {
@@ -38,20 +45,25 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Setup Views
     private func setupViews() {
-        contentView.addSubview(voteLabel)
+        contentView.addSubview(stackView)
         
-        contentView.addSubview(posterImageView2)
+        stackView.addArrangedSubview(numberLabel)
+        
+        stackView.addArrangedSubview(posterImageView2)
     }
     
     // MARK: - Setup Constraints
     private func setupConstraints() {
+        stackView.snp.makeConstraints { make in
+            make.edges.equalTo(contentView)
+        }
+        numberLabel.snp.makeConstraints { make in
+            make.height.equalToSuperview()
+            make.width.lessThanOrEqualTo(115)
+        }
         posterImageView2.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(contentView.snp.height)
+            make.height.equalToSuperview()
+            make.width.equalTo(105)
         }
-        voteLabel.snp.makeConstraints { make in
-            make.top.equalTo(posterImageView2.snp.bottom)
-        }
-        
     }
 }

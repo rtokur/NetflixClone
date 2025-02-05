@@ -7,11 +7,15 @@
 import UIKit
 import SnapKit
 import Kingfisher
-class HomeVC: UIViewController {
+class HomeVC: UIViewController, CarouselViewDelegate {
+    func didSelectMovie(_ upcoming: Movie) {
+        let dVC = DetailVC()
+        dVC.movie = upcoming
+        present(dVC, animated: true)
+    }
     
     // MARK: - Properties
     let connection = Connection()
-    
     private let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -40,18 +44,7 @@ class HomeVC: UIViewController {
     private lazy var topRatedCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 105, height: 175)
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .clear
-        collectionView.showsHorizontalScrollIndicator = false
-        return collectionView
-    }()
-    
-    private lazy var upComingMovieCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 300, height: 500)
-        layout.minimumInteritemSpacing = 1
+        layout.itemSize = CGSize(width: 220, height: 175)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
@@ -87,8 +80,10 @@ class HomeVC: UIViewController {
     
     private lazy var popularMovies: [Movie] = []
     private lazy var topRated: [Movie] = []
-    private lazy var upComing: [Movie] = []
+    lazy var upComing: [Movie] = []
     private lazy var popularSeries: [Serie] = []
+    
+    let upComingView = CarouselView()
     
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
@@ -121,7 +116,6 @@ class HomeVC: UIViewController {
     }
     //MARK: -Register Cells for loading
     private func registerCells() {
-        upComingMovieCollectionView.register(UpComingMovieCollectionViewCell.self, forCellWithReuseIdentifier: "UpComingMovieCollectionViewCell")
         popularMovieCollectionView.register(PopularMovieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularMovieCollectionViewCell")
         topRatedCollectionView.register(TopRatedMovieCollectionViewCell.self, forCellWithReuseIdentifier: "TopRatedMovieCollectionViewCell")
         popularSerieCollectionView.register(PopularSerieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularSerieCollectionViewCell")
@@ -133,7 +127,7 @@ class HomeVC: UIViewController {
             popularSeries = try await connection.getPopularSeries()
             upComing = try await connection.getUpComingMovies()
             topRated = try await connection.getTopRatedMovies()
-            upComingMovieCollectionView.reloadData()
+            upComingView.configureView(with: upComing)
             popularMovieCollectionView.reloadData()
             popularSerieCollectionView.reloadData()
             topRatedCollectionView.reloadData()
@@ -149,10 +143,8 @@ class HomeVC: UIViewController {
 
         scrollView.addSubview(stackView)
         
-        //Delegate and data source operations
-        upComingMovieCollectionView.delegate = self
-        upComingMovieCollectionView.dataSource = self
-        stackView.addArrangedSubview(upComingMovieCollectionView)
+        upComingView.delegate = self
+        stackView.addArrangedSubview(upComingView)
         
         stackView.addArrangedSubview(popularTitleLabel)
         
@@ -190,8 +182,8 @@ class HomeVC: UIViewController {
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
-        upComingMovieCollectionView.snp.makeConstraints { make in
-            make.height.equalTo(550)
+        upComingView.snp.makeConstraints { make in
+            make.height.equalTo(650)
         }
         popularTitleLabel.snp.makeConstraints { make in
             make.height.equalTo(25)
@@ -222,8 +214,6 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topRatedCollectionView {
             return topRated.count
-        }else if collectionView == upComingMovieCollectionView {
-            return upComing.count
         } else if collectionView == popularSerieCollectionView {
             return popularSeries.count
         }
@@ -234,18 +224,10 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         if collectionView == topRatedCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TopRatedMovieCollectionViewCell", for: indexPath) as! TopRatedMovieCollectionViewCell
             let movie = topRated[indexPath.row]
-            cell.voteLabel.text = "\(movie.vote)"
+            cell.numberLabel.text = "\(indexPath.row + 1)"
             if let url = movie.posterURL {
                 cell.posterImageView2.kf.setImage(with: url)
             }
-            return cell
-        }else if collectionView == upComingMovieCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "UpComingMovieCollectionViewCell", for: indexPath) as! UpComingMovieCollectionViewCell
-            let movie = upComing[indexPath.row]
-            if let url = movie.posterURL {
-                cell.imageView.kf.setImage(with: url)
-            }
-
             return cell
         }else if collectionView == popularSerieCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PopularSerieCollectionViewCell", for: indexPath) as! PopularSerieCollectionViewCell
@@ -279,8 +261,6 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         }else{
             if collectionView == topRatedCollectionView {
                 dVC.movie = topRated[indexPath.row]
-            }else if collectionView == upComingMovieCollectionView {
-                dVC.movie = upComing[indexPath.row]
             }
             else {
                 dVC.movie = popularMovies[indexPath.row]

@@ -7,6 +7,7 @@
 
 import UIKit
 import SnapKit
+import Kingfisher
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - UI Elements
     let view : UIView = {
@@ -43,7 +44,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     let favoriteButton : UIButton = {
         let favoriteButton = UIButton()
         favoriteButton.backgroundColor = .darkGray.withAlphaComponent(0.4)
-        favoriteButton.setImage(UIImage(systemName: "heart.fill"), for: UIControl.State.normal)
+        favoriteButton.setImage(UIImage(systemName: "plus"), for: UIControl.State.normal)
         favoriteButton.setTitle("Favorites", for: UIControl.State.normal)
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
@@ -116,5 +117,10 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
             make.height.equalToSuperview()
         }
     }
+    
+    func configure(url: URL?) {
+        imageView.kf.setImage(with: url)
+    }
 }
+
 

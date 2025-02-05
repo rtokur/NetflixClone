@@ -37,7 +37,11 @@ class DetailVC: UIViewController {
         return playButton
     }()
     
-    let scrollView = UIScrollView()
+    let scrollView : UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
+    }()
     
     let stackView : UIStackView = {
         let stackView = UIStackView()
@@ -82,6 +86,14 @@ class DetailVC: UIViewController {
         let button = UIButton()
         button.backgroundColor = .systemBackground
         button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.setTitle("Favorites", for: .normal)
+        button.setTitleColor(.label, for: .normal)
+        button.contentVerticalAlignment = .center
+        button.contentHorizontalAlignment = .center
+        button.imageView?.contentMode = .scaleAspectFit
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 9, weight: .bold)
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: -40)
+        button.titleEdgeInsets = UIEdgeInsets(top: 38, left: -20, bottom: 0, right: 0)
         button.tintColor = .label
         return button
     }()
@@ -152,6 +164,8 @@ class DetailVC: UIViewController {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.translatesAutoresizingMaskIntoConstraints = false
         collectionView.backgroundColor = .systemBackground
+        collectionView.isScrollEnabled = false
+        
         collectionView.showsVerticalScrollIndicator = false
         return collectionView
     }()
@@ -163,12 +177,17 @@ class DetailVC: UIViewController {
     var episode : [Episode]? = []
     var menuChildren : [UIMenuElement] = []
     let actionClosure = { (action : UIAction) in
-        print(action.title)
+        let number = action.title.components(separatedBy: ".")
+        print(number[0])
+//        Task {
+//            await self.updateEpisodes(seasonNumber: Int(number[0])!)
+//        }
     }
     override func viewDidLoad() {
         super.viewDidLoad()
         
         menuChildren.append(UIAction(title: "1. Season", handler: actionClosure))
+        
         view.backgroundColor = .systemBackground
         setupViews()
         setupConstraints()
@@ -176,7 +195,12 @@ class DetailVC: UIViewController {
         registerCells()
         // Do any additional setup after loading the view.
     }
-
+//    func updateEpisodes(seasonNumber: Int) async {
+//        episode = try! await connection.getEpisodeDetail(serieId: serie!.id!, seasonNumber: seasonNumber)
+//        
+//        episodeCollectionView.reloadData()
+//        
+//    }
     // MARK: - Make call for movie or serie detail from API
     func getData(){
         if let movieId = movie?.id {
@@ -194,6 +218,15 @@ class DetailVC: UIViewController {
                     }
                     genresLabel.text = "\(genresName.joined(separator: " • "))"
                 }
+                episodeLabel.snp.makeConstraints { make in
+                    make.height.equalTo(0)
+                }
+                episodeCollectionView.snp.makeConstraints { make in
+                    make.height.equalTo(0)
+                }
+                menuChildren.removeAll(keepingCapacity: true)
+                menuChildren.append(UIAction(title: " " ,handler: actionClosure))
+                seasonButton.backgroundColor = .clear
             }
         }
         else if let serieId = serie?.id {
@@ -215,6 +248,7 @@ class DetailVC: UIViewController {
                         menuChildren.append(UIAction(title: "\(season). Season", handler: actionClosure))
                     }
                     seasonButton.menu = UIMenu(options: .displayInline, children: menuChildren)
+                    seasonButton.menu?.displayPreferences = .none
                     episodeCollectionView.reloadData()
 
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
@@ -322,15 +356,14 @@ class DetailVC: UIViewController {
     // MARK: - Setup Constraints
     func setupConstraints(){
         scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
+            make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
         }
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(13)
-            make.width.equalTo(scrollView).inset(13)
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
 
         imageView.snp.makeConstraints { make in
@@ -371,21 +404,30 @@ class DetailVC: UIViewController {
         }
         favoriteButton.snp.makeConstraints { make in
             make.height.equalTo(60)
-            make.width.equalTo(stackView).dividedBy(5.5)
+            make.width.equalTo(stackView).dividedBy(5.6)
         }
         episodeLabel.snp.makeConstraints { make in
             make.height.equalTo(15)
         }
         seasonButton.snp.makeConstraints { make in
             make.height.equalTo(30)
-            make.width.equalTo(70)
+            make.width.equalTo(stackView).dividedBy(3.4)
         }
         episodeCollectionView.snp.makeConstraints { make in
-            make.height.equalTo(200)
+            make.width.equalToSuperview()
+            make.height.equalTo(2000)
         }
     }
+//    override func viewDidLayoutSubviews() {
+//        super.viewDidLayoutSubviews()
+//        
+//        episodeCollectionView.snp.makeConstraints { make in
+//            make.height.equalTo(episodeCollectionView.contentSize.height).priority(.high)
+//        }
+//    }
 
 }
+
 // MARK: - CollectionViewDelegate and DataSource Methods
 extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {

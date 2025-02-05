@@ -39,9 +39,6 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
     let stackView: UIStackView = {
         let stackview = UIStackView()
         stackview.axis = .horizontal
-        stackview.spacing = 4
-        stackview.alignment = .fill
-        stackview.distribution = .fill
         return stackview
     }()
     
@@ -64,17 +61,12 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
     let stackView2: UIStackView = {
         let stackview = UIStackView()
         stackview.axis = .vertical
-        stackview.alignment = .fill
-        stackview.distribution = .fill
         return stackview
     }()
     
     let stackView3: UIStackView = {
         let stackview = UIStackView()
         stackview.axis = .vertical
-        stackview.spacing = 2
-        stackview.alignment = .fill
-        stackview.distribution = .fill
         return stackview
     }()
     
@@ -125,9 +117,7 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
         }
         stackView.snp.makeConstraints { make in
             make.height.equalTo(97)
-        }
-        stackView2.snp.makeConstraints { make in
-            make.height.equalTo(97)
+            make.width.equalTo(130)
         }
         imageVieww.snp.makeConstraints { make in
             make.width.equalTo(172.5)
@@ -141,11 +131,16 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
         playButton.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
+        stackView2.snp.makeConstraints { make in
+            make.height.equalTo(97)
+        }
         episodeLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(stackView).multipliedBy(0.75)
+            make.centerY.equalToSuperview().offset(-10)
+            make.leading.equalToSuperview().inset(5)
         }
         runtimeLabel.snp.makeConstraints { make in
-            make.centerY.equalTo(stackView).multipliedBy(1.25)
+            make.top.equalToSuperview().inset(28)
+            make.leading.equalToSuperview().inset(5)
         }
         overview.snp.makeConstraints { make in
             make.width.equalToSuperview()
