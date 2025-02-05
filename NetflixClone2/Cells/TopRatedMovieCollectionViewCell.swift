@@ -25,6 +25,11 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
         return stackView
     }()
     
+    let view : UIView = {
+        let view = UIView()
+        return view
+    }()
+    
     let numberLabel : UILabel = {
         let label = UILabel()
         label.textColor = .label
@@ -45,24 +50,25 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Setup Views
     private func setupViews() {
-        contentView.addSubview(stackView)
+        contentView.addSubview(view)
+        view.addSubview(posterImageView2)
+        view.addSubview(numberLabel)
         
-        stackView.addArrangedSubview(numberLabel)
         
-        stackView.addArrangedSubview(posterImageView2)
     }
     
     // MARK: - Setup Constraints
     private func setupConstraints() {
-        stackView.snp.makeConstraints { make in
+        view.snp.makeConstraints { make in
             make.edges.equalTo(contentView)
         }
+        
         numberLabel.snp.makeConstraints { make in
-            make.height.equalToSuperview()
-            make.width.lessThanOrEqualTo(115)
+            make.bottom.top.equalToSuperview()
+            make.leading.equalToSuperview().inset(25)
         }
         posterImageView2.snp.makeConstraints { make in
-            make.height.equalToSuperview()
+            make.bottom.top.trailing.equalToSuperview()
             make.width.equalTo(105)
         }
     }

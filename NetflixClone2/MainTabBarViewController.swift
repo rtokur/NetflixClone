@@ -19,7 +19,7 @@ class MainTabBarViewController: UITabBarController {
         
         //MARK: -TabBar Symbols
         vc1.tabBarItem.image = UIImage(systemName: "house")
-        vc2.tabBarItem.image = UIImage(systemName: "heart")
+        vc2.tabBarItem.image = UIImage(systemName: "plus")
         
         //MARK: -TabBar Titles
         vc1.title = "Home"

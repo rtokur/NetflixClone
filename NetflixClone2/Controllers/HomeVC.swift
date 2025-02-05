@@ -8,6 +8,7 @@ import UIKit
 import SnapKit
 import Kingfisher
 class HomeVC: UIViewController, CarouselViewDelegate {
+    
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
         dVC.movie = upcoming
@@ -44,7 +45,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     private lazy var topRatedCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 220, height: 175)
+        layout.itemSize = CGSize(width: 210, height: 175)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
@@ -270,3 +271,5 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
     }
     
 }
+
+

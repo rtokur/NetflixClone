@@ -7,10 +7,19 @@
 
 import UIKit
 import SnapKit
+
+// MARK: - Protocol
+protocol CarouselViewDelegate : AnyObject {
+    func didSelectMovie(_ upcoming: Movie)
+}
+
 class CarouselView: UIView, UICollectionViewDelegate {
-    
+    // MARK: - Properties
     weak var delegate: CarouselViewDelegate?
+    private var upcomingData : [Movie] = []
+    private var currentPage = 0
     
+    // MARK: - UI Elements
     private lazy var upComingMovieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
@@ -31,9 +40,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
         return pageControl
     }()
     
-    private var upcomingData : [Movie] = []
-    private var currentPage = 0
-
+    // MARK: - Initializers
     override init(frame:CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -42,7 +49,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+    // MARK: - Setup Methods
     private func setupViews() {
         addSubview(upComingMovieCollectionView)
         addSubview(pageControl)
@@ -57,16 +64,15 @@ class CarouselView: UIView, UICollectionViewDelegate {
             make.centerX.equalToSuperview()
         }
     }
-    
+    // MARK: - Scroll View Delegate
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let pageIndex = Int(scrollView.contentOffset.x / scrollView.frame.width)
         pageControl.currentPage = pageIndex
     }
     
 }
-protocol CarouselViewDelegate : AnyObject {
-    func didSelectMovie(_ upcoming: Movie)
-}
+
+// MARK: - UICollectionViewDataSource
 extension CarouselView: UICollectionViewDataSource {
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
@@ -79,6 +85,7 @@ extension CarouselView: UICollectionViewDataSource {
         
         let url = upcomingData[indexPath.row].posterURL
         print(url)
+        cell.movie = upcomingData[indexPath.row]
         cell.configure(url: url)
         return cell
     }
@@ -87,7 +94,7 @@ extension CarouselView: UICollectionViewDataSource {
         delegate?.didSelectMovie(upcomingMovie)
     }
 }
-
+// MARK: - Update Method
 extension CarouselView {
     public func configureView(with data: [Movie]) {
         self.upcomingData = data

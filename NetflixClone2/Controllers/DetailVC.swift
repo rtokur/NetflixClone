@@ -9,9 +9,9 @@ import UIKit
 import SnapKit
 import Kingfisher
 class DetailVC: UIViewController {
-    // MARK: - UI Elements
+
     let connection = Connection()
-    
+    // MARK: - UI Elements
     let imageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -139,7 +139,6 @@ class DetailVC: UIViewController {
     
     let seasonButton: UIButton = {
         let button = UIButton()
-        button.setTitle("1. Season", for: .normal)
         button.backgroundColor = .systemGray3
         button.setTitleColor(.lightGray, for: .normal)
         button.layer.cornerRadius = 5
@@ -176,17 +175,9 @@ class DetailVC: UIViewController {
     var genres : [Genre]? = []
     var episode : [Episode]? = []
     var menuChildren : [UIMenuElement] = []
-    let actionClosure = { (action : UIAction) in
-        let number = action.title.components(separatedBy: ".")
-        print(number[0])
-//        Task {
-//            await self.updateEpisodes(seasonNumber: Int(number[0])!)
-//        }
-    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        menuChildren.append(UIAction(title: "1. Season", handler: actionClosure))
         
         view.backgroundColor = .systemBackground
         setupViews()
@@ -195,12 +186,14 @@ class DetailVC: UIViewController {
         registerCells()
         // Do any additional setup after loading the view.
     }
-//    func updateEpisodes(seasonNumber: Int) async {
-//        episode = try! await connection.getEpisodeDetail(serieId: serie!.id!, seasonNumber: seasonNumber)
-//        
-//        episodeCollectionView.reloadData()
-//        
-//    }
+    // MARK: - Update CollectionView size
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        self.episodeCollectionView.snp.updateConstraints { make in
+            make.height.equalTo(episodeCollectionView.collectionViewLayout.collectionViewContentSize.height)
+        }
+    }
     // MARK: - Make call for movie or serie detail from API
     func getData(){
         if let movieId = movie?.id {
@@ -218,14 +211,6 @@ class DetailVC: UIViewController {
                     }
                     genresLabel.text = "\(genresName.joined(separator: " • "))"
                 }
-                episodeLabel.snp.makeConstraints { make in
-                    make.height.equalTo(0)
-                }
-                episodeCollectionView.snp.makeConstraints { make in
-                    make.height.equalTo(0)
-                }
-                menuChildren.removeAll(keepingCapacity: true)
-                menuChildren.append(UIAction(title: " " ,handler: actionClosure))
                 seasonButton.backgroundColor = .clear
             }
         }
@@ -233,6 +218,7 @@ class DetailVC: UIViewController {
             Task {
                 detail = try await connection.getSerieDetail(serieId: serieId)
                 episode = try await connection.getEpisodeDetail(serieId: serieId, seasonNumber: 1)
+                
                 if let numberOfSeasons = detail?.numberOfSeasons, numberOfSeasons != 1 {
                     runtimeLabel.text = "\(numberOfSeasons) Seasons"
                     if let genres2 = detail?.genres {
@@ -245,12 +231,19 @@ class DetailVC: UIViewController {
                     }
                     menuChildren.removeAll(keepingCapacity: true)
                     for season in 1..<(numberOfSeasons+1) {
-                        menuChildren.append(UIAction(title: "\(season). Season", handler: actionClosure))
+                        menuChildren.append(UIAction(title: "\(season). Season", handler: { _ in
+                            Task {
+                                self.episode = try await self.connection.getEpisodeDetail(serieId: serieId, seasonNumber: season)
+                                self.episodeCollectionView.reloadData()
+                            }
+                        }))
                     }
+                    seasonButton.isHidden = false
                     seasonButton.menu = UIMenu(options: .displayInline, children: menuChildren)
                     seasonButton.menu?.displayPreferences = .none
+                    episodeLabel.isHidden = true
                     episodeCollectionView.reloadData()
-
+                    
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
                     runtimeLabel.text = "\(numberOfEpisodes) Episodes"
                     if let genres2 = detail?.genres {
@@ -275,8 +268,9 @@ class DetailVC: UIViewController {
     // MARK: - Setup Views
     func setupViews(){
         view.addSubview(scrollView)
-
+        
         scrollView.addSubview(stackView)
+        
         
         // ImageView's image setting
         if let posterPath = serie?.posterPath  {
@@ -292,7 +286,7 @@ class DetailVC: UIViewController {
         stackView.addArrangedSubview(imageView)
         
         view.addSubview(view2)
-
+        
         view2.addSubview(playButton)
         
         // Title Label text setting
@@ -307,7 +301,7 @@ class DetailVC: UIViewController {
         
         stackView.addArrangedSubview(stackView2)
         
-//      Setting datelabel text
+        //      Setting datelabel text
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         if let releaseDate = movie?.releaseDate , let release = dateFormatter.date(from: releaseDate){
@@ -322,10 +316,9 @@ class DetailVC: UIViewController {
         stackView2.addArrangedSubview(dateLabel)
         
         stackView2.addArrangedSubview(runtimeLabel)
-
+        
         stackView.addArrangedSubview(playButton2)
-
-        // Description Label Text setting
+        
         if let overview = movie?.overview  {
             descriptionLabel.text = overview
         } else if let overview = serie?.overview {
@@ -339,6 +332,7 @@ class DetailVC: UIViewController {
         
         seasonButton.showsMenuAsPrimaryAction = true
         seasonButton.changesSelectionAsPrimaryAction = true
+        seasonButton.isHidden = true
         stackView.addArrangedSubview(seasonButton)
         
         episodeCollectionView.delegate = self
@@ -362,12 +356,12 @@ class DetailVC: UIViewController {
             make.center.equalToSuperview()
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.top.bottom.equalTo(scrollView.contentLayoutGuide)
+            make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
             make.width.equalTo(scrollView.frameLayoutGuide)
         }
-
         imageView.snp.makeConstraints { make in
-            make.width.equalTo(stackView)
+            make.width.equalToSuperview()
             make.height.equalTo(230)
         }
         view2.snp.makeConstraints { make in
@@ -378,7 +372,7 @@ class DetailVC: UIViewController {
         playButton.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
- 
+        
         titleLabel.snp.makeConstraints { make in
             make.height.equalTo(18)
         }
@@ -394,9 +388,9 @@ class DetailVC: UIViewController {
         runtimeLabel.snp.makeConstraints { make in
             make.height.equalTo(18)
         }
-
+        
         playButton2.snp.makeConstraints { make in
-            make.width.equalTo(stackView)
+            make.width.equalToSuperview()
             make.height.equalTo(40)
         }
         descriptionLabel.snp.makeConstraints { make in
@@ -415,17 +409,17 @@ class DetailVC: UIViewController {
         }
         episodeCollectionView.snp.makeConstraints { make in
             make.width.equalToSuperview()
-            make.height.equalTo(2000)
+            make.height.equalTo(1)
         }
     }
-//    override func viewDidLayoutSubviews() {
-//        super.viewDidLayoutSubviews()
-//        
-//        episodeCollectionView.snp.makeConstraints { make in
-//            make.height.equalTo(episodeCollectionView.contentSize.height).priority(.high)
-//        }
-//    }
-
+    //    override func viewDidLayoutSubviews() {
+    //        super.viewDidLayoutSubviews()
+    //
+    //        episodeCollectionView.snp.makeConstraints { make in
+    //            make.height.equalTo(episodeCollectionView.contentSize.height).priority(.high)
+    //        }
+    //    }
+    
 }
 
 // MARK: - CollectionViewDelegate and DataSource Methods
@@ -437,7 +431,7 @@ extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
         let episod = episode?[indexPath.row]
-
+        
         if let url = episod?.stillURL {
             cell.imageVieww.kf.setImage(with: url)
             print(url)

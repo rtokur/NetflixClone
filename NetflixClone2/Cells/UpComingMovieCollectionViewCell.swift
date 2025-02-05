@@ -8,8 +8,12 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import RealmSwift
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
-    // MARK: - UI Elements
+    // MARK: - Properties
+    
+    let realm = try! Realm()
+    
     let view : UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
@@ -64,6 +68,8 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         return stackView3
     }()
     
+    var movie: Movie?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -89,8 +95,14 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     }
     
     // MARK: - Favorite Button Action method
-    @objc func favoriteButtonAction(sender: UIButton!) {
-        print("favoritebuttontapped")
+    @objc func favoriteButtonAction(_ sender: UIButton!) {
+        let movie = RealmMovie()
+        movie.movieName = self.movie?.title ?? ""
+        movie.moviePath = self.movie?.posterPath ?? ""
+        
+        realm.beginWrite()
+        realm.add(movie)
+        try! realm.commitWrite()
     }
     // MARK: - Play Button Action method
     @objc func playButtonAction(sender: UIButton!) {
@@ -117,7 +129,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
             make.height.equalToSuperview()
         }
     }
-    
+    // MARK: - Configure ImageView
     func configure(url: URL?) {
         imageView.kf.setImage(with: url)
     }
