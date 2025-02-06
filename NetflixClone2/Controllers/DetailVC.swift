@@ -8,8 +8,11 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import RealmSwift
 class DetailVC: UIViewController {
 
+    let realm = try! Realm()
+    
     let connection = Connection()
     // MARK: - UI Elements
     let imageView : UIImageView = {
@@ -85,13 +88,13 @@ class DetailVC: UIViewController {
     let favoriteButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemBackground
-        button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.setTitle("Favorites", for: .normal)
         button.setTitleColor(.label, for: .normal)
         button.contentVerticalAlignment = .center
         button.contentHorizontalAlignment = .center
         button.imageView?.contentMode = .scaleAspectFit
         button.titleLabel?.font = UIFont.systemFont(ofSize: 9, weight: .bold)
+        button.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: -40)
         button.titleEdgeInsets = UIEdgeInsets(top: 38, left: -20, bottom: 0, right: 0)
         button.tintColor = .label
@@ -271,7 +274,6 @@ class DetailVC: UIViewController {
         
         scrollView.addSubview(stackView)
         
-        
         // ImageView's image setting
         if let posterPath = serie?.posterPath  {
             if let url = serie?.posterURL {
@@ -325,6 +327,11 @@ class DetailVC: UIViewController {
             descriptionLabel.text = overview
         }
         stackView.addArrangedSubview(descriptionLabel)
+        if (realm.objects(RealmMovie.self).where{$0.movieName == movie?.title ?? ""}).isEmpty {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        }
         
         stackView.addArrangedSubview(favoriteButton)
         
@@ -346,7 +353,24 @@ class DetailVC: UIViewController {
     @objc func playButtonAction(sender: UIButton) {
         print("play button tapped")
     }
-    
+    // MARK: - Add to Favorites or Delete from Favorites
+    @objc func favoriteButtonAction(_ sender: UIButton) {
+        if (realm.objects(RealmMovie.self).where{ $0.movieName == movie?.title ?? "" }).isEmpty {
+            let movie2 = RealmMovie()
+            movie2.movieName = movie?.title ?? ""
+            movie2.moviePath = movie?.posterPath ?? ""
+            realm.beginWrite()
+            realm.add(movie2)
+            try! realm.commitWrite()
+            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        }else {
+            let deletedmovie = realm.objects(RealmMovie.self).where{$0.movieName == movie?.title ?? ""}
+            realm.beginWrite()
+            realm.delete(deletedmovie)
+            try! realm.commitWrite()
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
+    }
     // MARK: - Setup Constraints
     func setupConstraints(){
         scrollView.snp.makeConstraints { make in
@@ -412,13 +436,6 @@ class DetailVC: UIViewController {
             make.height.equalTo(1)
         }
     }
-    //    override func viewDidLayoutSubviews() {
-    //        super.viewDidLayoutSubviews()
-    //
-    //        episodeCollectionView.snp.makeConstraints { make in
-    //            make.height.equalTo(episodeCollectionView.contentSize.height).priority(.high)
-    //        }
-    //    }
     
 }
 

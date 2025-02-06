@@ -9,6 +9,8 @@ import Foundation
 import RealmSwift
 class RealmMovie: Object {
     // MARK: - Properties
-    @objc dynamic var movieName: String?
-    @objc dynamic var moviePath: String?
+    @objc dynamic var movieName: String = ""
+    @objc dynamic var moviePath: String = ""
+    
 }
+

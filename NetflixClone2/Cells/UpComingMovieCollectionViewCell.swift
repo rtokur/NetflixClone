@@ -48,7 +48,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     let favoriteButton : UIButton = {
         let favoriteButton = UIButton()
         favoriteButton.backgroundColor = .darkGray.withAlphaComponent(0.4)
-        favoriteButton.setImage(UIImage(systemName: "plus"), for: UIControl.State.normal)
         favoriteButton.setTitle("Favorites", for: UIControl.State.normal)
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
@@ -90,19 +89,29 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         // MARK: - Play Button
         stackView3.addArrangedSubview(playButton)
         
-        // MARK: - Favorite Button
         stackView3.addArrangedSubview(favoriteButton)
     }
     
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
-        let movie = RealmMovie()
-        movie.movieName = self.movie?.title ?? ""
-        movie.moviePath = self.movie?.posterPath ?? ""
+        if (realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!}).isEmpty) {
+            let movie = RealmMovie()
+            movie.movieName = self.movie?.title ?? ""
+            movie.moviePath = self.movie?.posterPath ?? ""
+            
+            realm.beginWrite()
+            realm.add(movie)
+            try! realm.commitWrite()
+            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        } else {
+            let deletemovie = realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!})
+            realm.beginWrite()
+            realm.delete(deletemovie)
+            try! realm.commitWrite()
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
+
         
-        realm.beginWrite()
-        realm.add(movie)
-        try! realm.commitWrite()
     }
     // MARK: - Play Button Action method
     @objc func playButtonAction(sender: UIButton!) {
@@ -128,10 +137,18 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         favoriteButton.snp.makeConstraints { make in
             make.height.equalToSuperview()
         }
+
     }
+    
     // MARK: - Configure ImageView
     func configure(url: URL?) {
         imageView.kf.setImage(with: url)
+        // MARK: - Favorite Button
+        if (realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!}).isEmpty) {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: UIControl.State.normal)
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        }
     }
 }
 

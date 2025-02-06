@@ -20,7 +20,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
     private var currentPage = 0
     
     // MARK: - UI Elements
-    private lazy var upComingMovieCollectionView: UICollectionView = {
+    lazy var upComingMovieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 366, height: 580)
@@ -69,7 +69,6 @@ class CarouselView: UIView, UICollectionViewDelegate {
         let pageIndex = Int(scrollView.contentOffset.x / scrollView.frame.width)
         pageControl.currentPage = pageIndex
     }
-    
 }
 
 // MARK: - UICollectionViewDataSource

@@ -8,7 +8,7 @@ import UIKit
 import SnapKit
 import Kingfisher
 class HomeVC: UIViewController, CarouselViewDelegate {
-    
+    // MARK: - Protocol from CarouselView
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
         dVC.movie = upcoming
@@ -138,6 +138,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     }
     // MARK: - Setup Views
     private func setupViews()  {
+        
         view.backgroundColor = .systemBackground
 
         view.addSubview(scrollView)
@@ -206,6 +207,9 @@ class HomeVC: UIViewController, CarouselViewDelegate {
             make.height.equalTo(175)
         }
         
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        upComingView.upComingMovieCollectionView.reloadData()
     }
 }
 
