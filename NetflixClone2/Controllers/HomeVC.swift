@@ -20,7 +20,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     private let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 16
+        stackView.spacing = 10
         stackView.alignment = .fill
         stackView.distribution = .fill
         return stackView
@@ -82,6 +82,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     private lazy var popularMovies: [Movie] = []
     private lazy var topRated: [Movie] = []
     lazy var upComing: [Movie] = []
+    lazy var genres: [Genre] = []
     private lazy var popularSeries: [Serie] = []
     
     let upComingView = CarouselView()
@@ -128,7 +129,8 @@ class HomeVC: UIViewController, CarouselViewDelegate {
             popularSeries = try await connection.getPopularSeries()
             upComing = try await connection.getUpComingMovies()
             topRated = try await connection.getTopRatedMovies()
-            upComingView.configureView(with: upComing)
+            genres = try await connection.getGenresMovie()
+            upComingView.configureView(with: upComing, data2: genres)
             popularMovieCollectionView.reloadData()
             popularSerieCollectionView.reloadData()
             topRatedCollectionView.reloadData()

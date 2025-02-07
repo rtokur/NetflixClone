@@ -112,7 +112,8 @@ class DetailVC: UIViewController {
         let descriptionLabel  = UILabel()
         descriptionLabel.font = .systemFont(ofSize: 13)
         descriptionLabel.textAlignment = .left
-        descriptionLabel.numberOfLines = .max
+        descriptionLabel.numberOfLines = 0
+        descriptionLabel.lineBreakMode = .byWordWrapping
         return descriptionLabel
     }()
     
@@ -160,7 +161,7 @@ class DetailVC: UIViewController {
     let episodeCollectionView : UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
-        layout.itemSize = CGSize(width: 360, height: 196)
+        layout.itemSize = CGSize(width: 360, height: 160)
         layout.minimumInteritemSpacing = 0
         layout.minimumLineSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)

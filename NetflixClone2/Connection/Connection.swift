@@ -114,6 +114,33 @@ class Connection {
         print(response2)
         return response
     }
+    // MARK: - Creating url genres for movies with path
+    func createUrlGenres(path:String) async throws -> GenreResponse {
+        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        let queryItems: [URLQueryItem] = [
+          URLQueryItem(name: "language", value: "en-US"),
+        ]
+        components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10
+        request.allHTTPHeaderFields = [
+          "accept": "application/json",
+          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+        ]
+
+        let (data, respons) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = respons as? HTTPURLResponse else {
+            throw URLError(.badServerResponse)
+        }
+        let response = try JSONDecoder().decode(GenreResponse.self, from: data)
+        let response2 = try? JSONSerialization.jsonObject(with: data, options: [])
+        print(response2)
+        return response
+    }
     // MARK: - Calling the creating url func and return the popular movie response
     func getPopularMovies() async throws -> [Movie] {
         let movieResponse: MovieResponse = try await createUrlMovie(path: "/movie/popular")
@@ -152,5 +179,11 @@ class Connection {
         let episodesResponse : EpisodeResponse =  try await createUrlEpisodes(path: "/tv/\(serieId)/season/\(seasonNumber)")
         let episodes : [Episode] = []
         return episodesResponse.episodes ?? episodes
+    }
+    // MARK: - Calling the creating url func and return the genres response
+    func getGenresMovie() async throws -> [Genre] {
+        let genresResponse : GenreResponse =  try await createUrlGenres(path: "/genre/movie/list")
+        let genres : [Genre] = []
+        return genresResponse.genres ?? genres
     }
 }

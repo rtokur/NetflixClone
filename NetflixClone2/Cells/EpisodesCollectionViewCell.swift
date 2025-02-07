@@ -14,7 +14,6 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
         imageView.contentMode = .scaleAspectFit
         imageView.layer.cornerRadius = 8
         imageView.clipsToBounds = true
-        imageView.backgroundColor = .blue
         return imageView
     }()
     
@@ -73,7 +72,8 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
     let overview: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 13)
-        label.numberOfLines = .max
+        label.numberOfLines = 0
+        label.lineBreakMode = .byWordWrapping
         label.textAlignment = .left
         label.textColor = .lightGray
         return label
@@ -113,14 +113,14 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
     func setupConstraints() {
         stackView3.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.height.equalTo(196)
+            make.height.equalToSuperview()
         }
         stackView.snp.makeConstraints { make in
-            make.height.equalTo(97)
+            make.height.equalTo(75)
             make.width.equalTo(130)
         }
         imageVieww.snp.makeConstraints { make in
-            make.width.equalTo(172.5)
+            make.width.equalTo(132)
             make.centerY.equalTo(stackView)
         }
         view.snp.makeConstraints { make in
@@ -132,7 +132,7 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
         }
         stackView2.snp.makeConstraints { make in
-            make.height.equalTo(97)
+            make.height.equalTo(80)
         }
         episodeLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview().offset(-10)

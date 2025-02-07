@@ -18,6 +18,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
     weak var delegate: CarouselViewDelegate?
     private var upcomingData : [Movie] = []
     private var currentPage = 0
+    private var genres: [Genre] = []
     
     // MARK: - UI Elements
     lazy var upComingMovieCollectionView: UICollectionView = {
@@ -85,6 +86,17 @@ extension CarouselView: UICollectionViewDataSource {
         let url = upcomingData[indexPath.row].posterURL
         print(url)
         cell.movie = upcomingData[indexPath.row]
+        var genreName: [String] = []
+        if let data = upcomingData[indexPath.row].genreIds {
+            for genreId in data {
+                for genre in self.genres {
+                    if genre.id == genreId {
+                        genreName.append(genre.name ?? "")
+                    }
+                }
+            }
+        }
+        cell.genreLabel.text = genreName.joined(separator: " • ")
         cell.configure(url: url)
         return cell
     }
@@ -95,8 +107,9 @@ extension CarouselView: UICollectionViewDataSource {
 }
 // MARK: - Update Method
 extension CarouselView {
-    public func configureView(with data: [Movie]) {
+    public func configureView(with data: [Movie], data2: [Genre]) {
         self.upcomingData = data
+        self.genres = data2
         self.pageControl.numberOfPages = data.count
         upComingMovieCollectionView.reloadData()
     }
