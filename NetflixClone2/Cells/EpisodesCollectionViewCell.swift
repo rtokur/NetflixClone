@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 
 class EpisodesCollectionViewCell: UICollectionViewCell {
+    // MARK: - UI Elements
     let imageVieww : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -117,7 +118,7 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
         }
         stackView.snp.makeConstraints { make in
             make.height.equalTo(75)
-            make.width.equalTo(130)
+            make.width.equalToSuperview()
         }
         imageVieww.snp.makeConstraints { make in
             make.width.equalTo(132)
@@ -132,7 +133,7 @@ class EpisodesCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
         }
         stackView2.snp.makeConstraints { make in
-            make.height.equalTo(80)
+            make.height.equalToSuperview()
         }
         episodeLabel.snp.makeConstraints { make in
             make.centerY.equalToSuperview().offset(-10)

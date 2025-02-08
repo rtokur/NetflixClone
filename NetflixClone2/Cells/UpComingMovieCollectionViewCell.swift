@@ -8,11 +8,9 @@
 import UIKit
 import SnapKit
 import Kingfisher
-import RealmSwift
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     
-    let realm = try! Realm()
     
     let view : UIView = {
         let view = UIView()
@@ -27,6 +25,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         gradiantLayer.locations = [0.0, 0.3]
         gradiantLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
         gradiantLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
+        
         return gradiantLayer
     }()
     
@@ -55,7 +54,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     
     let favoriteButton : UIButton = {
         let favoriteButton = UIButton()
-        favoriteButton.backgroundColor = .darkGray.withAlphaComponent(0.4)
+        favoriteButton.backgroundColor = .darkGray
         favoriteButton.setTitle("Favorites", for: UIControl.State.normal)
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
@@ -107,6 +106,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(imageView)
         
         contentView.addSubview(view)
+        
         view.layer.insertSublayer(gradiantLayer, at: 0)
         
         view.addSubview(stackView)
@@ -125,25 +125,8 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         
         gradiantLayer.frame = view.bounds
     }
-    
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
-        if (realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!}).isEmpty) {
-            let movie = RealmMovie()
-            movie.movieName = self.movie?.title ?? ""
-            movie.moviePath = self.movie?.posterPath ?? ""
-            
-            realm.beginWrite()
-            realm.add(movie)
-            try! realm.commitWrite()
-            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        } else {
-            let deletemovie = realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!})
-            realm.beginWrite()
-            realm.delete(deletemovie)
-            try! realm.commitWrite()
-            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        }
 
         
     }
@@ -162,7 +145,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
             make.bottom.equalToSuperview()
             make.width.equalToSuperview()
         }
-        
         stackView.snp.makeConstraints { make in
             make.edges.equalToSuperview().inset(13)
         }
@@ -187,11 +169,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     func configure(url: URL?) {
         imageView.kf.setImage(with: url)
         // MARK: - Favorite Button
-        if (realm.objects(RealmMovie.self).where({$0.movieName == (self.movie?.title)!}).isEmpty) {
-            favoriteButton.setImage(UIImage(systemName: "plus"), for: UIControl.State.normal)
-        } else {
-            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        }
     }
 }
 

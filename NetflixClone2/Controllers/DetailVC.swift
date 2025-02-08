@@ -8,10 +8,8 @@
 import UIKit
 import SnapKit
 import Kingfisher
-import RealmSwift
 class DetailVC: UIViewController {
 
-    let realm = try! Realm()
     
     let connection = Connection()
     // MARK: - UI Elements
@@ -328,11 +326,7 @@ class DetailVC: UIViewController {
             descriptionLabel.text = overview
         }
         stackView.addArrangedSubview(descriptionLabel)
-        if (realm.objects(RealmMovie.self).where{$0.movieName == movie?.title ?? ""}).isEmpty {
-            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        } else {
-            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        }
+        
         
         stackView.addArrangedSubview(favoriteButton)
         
@@ -356,21 +350,8 @@ class DetailVC: UIViewController {
     }
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
-        if (realm.objects(RealmMovie.self).where{ $0.movieName == movie?.title ?? "" }).isEmpty {
-            let movie2 = RealmMovie()
-            movie2.movieName = movie?.title ?? ""
-            movie2.moviePath = movie?.posterPath ?? ""
-            realm.beginWrite()
-            realm.add(movie2)
-            try! realm.commitWrite()
-            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-        }else {
-            let deletedmovie = realm.objects(RealmMovie.self).where{$0.movieName == movie?.title ?? ""}
-            realm.beginWrite()
-            realm.delete(deletedmovie)
-            try! realm.commitWrite()
-            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        }
+        
+        
     }
     // MARK: - Setup Constraints
     func setupConstraints(){

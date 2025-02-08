@@ -6,13 +6,11 @@
 //
 
 import UIKit
-import RealmSwift
 import SnapKit
 import Kingfisher
 class FavoriteVC: UIViewController {
     // MARK: - Properties
     var count: Int = 0
-    lazy var realm = try! Realm()
     
     let stackView : UIStackView = {
         let stackView = UIStackView()
@@ -49,7 +47,7 @@ class FavoriteVC: UIViewController {
         label.numberOfLines = 0
         return label
     }()
-    
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
@@ -98,25 +96,11 @@ class FavoriteVC: UIViewController {
 // MARK: - UICollectionView Delegate & DataSource
 extension FavoriteVC : UICollectionViewDelegate,UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        let movies = realm.objects(RealmMovie.self)
-        return movies.count
+        return 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FavoriteCollectionViewCell", for: indexPath) as! FavoriteCollectionViewCell
-        let movies = realm.objects(RealmMovie.self)
-        cell.titleLabel.text = movies[indexPath.row].movieName
-        let posterPath = movies[indexPath.row].moviePath
-        let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)")
-        if count % 2 == 1 {
-            cell.playButton.setImage(UIImage(systemName: "trash"), for: .normal)
-            cell.playButton.tintColor = .red
-        }else {
-            cell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
-            cell.playButton.tintColor = .label
-        }
-        cell.moviename = movies[indexPath.row].movieName
-        cell.imageView.kf.setImage(with: url)
         return cell
     }
     

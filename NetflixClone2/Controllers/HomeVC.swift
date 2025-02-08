@@ -116,6 +116,9 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         getData()
         registerCells()
     }
+    override func viewWillAppear(_ animated: Bool) {
+        upComingView.upComingMovieCollectionView.reloadData()
+    }
     //MARK: -Register Cells for loading
     private func registerCells() {
         popularMovieCollectionView.register(PopularMovieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularMovieCollectionViewCell")
@@ -180,8 +183,8 @@ class HomeVC: UIViewController, CarouselViewDelegate {
             make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalTo(scrollView.contentLayoutGuide) // ScrollView'in içeriğine bağla
-            make.width.equalTo(scrollView.frameLayoutGuide)// Genişlik sabit kalmalı
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -210,9 +213,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         }
         
     }
-    override func viewWillAppear(_ animated: Bool) {
-        upComingView.upComingMovieCollectionView.reloadData()
-    }
+
 }
 
 
@@ -260,7 +261,6 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // handle tap events
-        dismiss(animated: true, completion: nil)
         let dVC = DetailVC()
         if collectionView == popularSerieCollectionView {
             dVC.serie = popularSeries[indexPath.row]

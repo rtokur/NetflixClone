@@ -7,10 +7,8 @@
 
 import UIKit
 import SnapKit
-import RealmSwift
 class FavoriteCollectionViewCell: UICollectionViewCell {
     // MARK: - UI Elements
-    let realm = try! Realm()
     
     let titleLabel: UILabel = {
         let label = UILabel()
@@ -55,15 +53,7 @@ class FavoriteCollectionViewCell: UICollectionViewCell {
     }
     // MARK: - Button Action
     @objc func playButtonAction() {
-        if playButton.tintColor == .red {
-            let deletedMovie = realm.objects(RealmMovie.self).where{$0.movieName == self.moviename}
-            realm.beginWrite()
-            realm.delete(deletedMovie)
-            try! realm.commitWrite()
-            print("deleted")
-        } else {
-            print("played")
-        }
+
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
