@@ -9,13 +9,18 @@ import UIKit
 import SnapKit
 import FirebaseFirestore
 import FirebaseStorage
+import FirebaseAuth
+
+protocol ReloadData: AnyObject {
+    func didUpdateProfile()
+}
 
 class EditProfileVC: UIViewController {
     
+    var delegate: ReloadData?
+    var count: Int = 0
     let db = Firestore.firestore()
-    
-    var documentId: String = ""
-    
+    let storage = Storage.storage()
     // MARK: - UI Elements
     let stackView: UIStackView = {
         let stackview = UIStackView()
@@ -127,8 +132,6 @@ class EditProfileVC: UIViewController {
         stackView.addArrangedSubview(nameText)
     }
     
-    
-    
     func setupConstraints(){
         stackView.snp.makeConstraints { make in
             make.height.equalTo(218)
@@ -172,20 +175,31 @@ class EditProfileVC: UIViewController {
             saveButton.isEnabled = true
             saveButton.setTitleColor(.label, for: .normal)
         }
-        
     }
     
     @objc func saveButtonAction(){
         let profileName = nameText.text
         let profileImage = imageView.image
         
-        dismiss(animated: true)
-        
+        if let userId = Auth.auth().currentUser?.uid {
+            Task {
+                var downloadURL = ""
+                let ref = storage.reference().child("Profiles/\(userId)/profile\(count+1).jpg")
+                var data = Data()
+                data = profileImage!.jpegData(compressionQuality: 0.8)!
+                try await ref.putData(data, metadata: nil)
+                downloadURL = try await ref.downloadURL().absoluteString
+                
+                try await db.collection("Users").document(userId).collection("Profiles").document().setData(["profileName":profileName,"profileImageURL":downloadURL])
+                
+                delegate?.didUpdateProfile()
+                
+                dismiss(animated: true)
+            }
+        }
     }
     
     @objc func cancelButtonAction(){
         dismiss(animated: true)
     }
-
-    
 }

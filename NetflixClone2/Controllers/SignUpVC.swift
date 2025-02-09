@@ -144,10 +144,10 @@ class SignUpVC: UIViewController {
                             }
                         }else {
                             Task{
-                                let ref = try await self.db.collection("Users").addDocument(data: ["email": email])
+                                print(authResult?.user.uid)
+                                try await self.db.collection("Users").document(authResult?.user.uid ?? "").setData(["email": email])
                                 print("User signed up")
                                 let pvc = ProfileVC()
-                                pvc.documentId = ref.documentID
                                 pvc.modalPresentationStyle = .fullScreen
                                 pvc.isModalInPresentation = true
                                 self.present(pvc, animated: true)
@@ -155,7 +155,6 @@ class SignUpVC: UIViewController {
                         }
                     }
                 }
-                
             }else {
                 let alert = UIAlertController(title: "Error", message: "Please enter a password", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .cancel))

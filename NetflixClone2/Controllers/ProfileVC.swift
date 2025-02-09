@@ -8,11 +8,18 @@
 import UIKit
 import SnapKit
 import FirebaseFirestore
+import FirebaseAuth
+import Kingfisher
 
-class ProfileVC: UIViewController {
-    let db = Firestore.firestore()
-    var documentId: String = ""
+class ProfileVC: UIViewController, ReloadData{
     
+    func didUpdateProfile() {
+        getProfileData()
+    }
+    
+    var delegate: ReloadData?
+    let db = Firestore.firestore()
+    var count : Int = 0
     // MARK: - UI Elements
     let stackView : UIStackView = {
         let stackview = UIStackView()
@@ -76,6 +83,7 @@ class ProfileVC: UIViewController {
         button.clipsToBounds = true
         button.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         button.addTarget(self, action: #selector(EditProfileButton), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     
@@ -85,6 +93,7 @@ class ProfileVC: UIViewController {
         label.textColor = .label
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
+        label.isHidden = true
         return label
     }()
     
@@ -113,6 +122,7 @@ class ProfileVC: UIViewController {
         button.clipsToBounds = true
         button.imageEdgeInsets = UIEdgeInsets(top: 5, left: 5, bottom: 5, right: 5)
         button.addTarget(self, action: #selector(EditProfileButton), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     
@@ -122,6 +132,7 @@ class ProfileVC: UIViewController {
         label.textColor = .label
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
+        label.isHidden = true
         return label
     }()
     
@@ -143,6 +154,7 @@ class ProfileVC: UIViewController {
         button.layer.cornerRadius = 5
         button.clipsToBounds = true
         button.addTarget(self, action: #selector(EditProfileButton), for: .touchUpInside)
+        button.isHidden = true
         return button
     }()
     
@@ -152,20 +164,58 @@ class ProfileVC: UIViewController {
         label.textColor = .label
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
+        label.isHidden = true
         return label
     }()
     
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        getProfileData()
         setupViews()
         setupConstraints()
     }
     // MARK: - Firebase Methods
     func getProfileData(){
-//        let ref = db.collection("Users").document(documentId).collection("Profiles").getDocuments()
+        if let userId = Auth.auth().currentUser?.uid {
+            Task{
+                let profiles = try await db.collection("Users").document(userId).collection("Profiles").getDocuments()
+                
+                count = profiles.documents.count
+                
+                guard count != 0 else {return}
+                
+                if let profile = profiles.documents[0].data()["profileName"] as? String, let profileUrl = profiles.documents[0].data()["profileImageURL"] as? String {
+                    button2.isHidden = false
+                    label2.isHidden = false
+                    label1.text = profile
+                    let profileURL = URL(string: profileUrl)
+                    button.imageView?.kf.setImage(with: profileURL)
+                    if count > 1 ,let profile2 = profiles.documents[1].data()["profileName"] as? String, let profileUrl = profiles.documents[1].data()["profileImageURL"] as? String{
+                        button3.isHidden = false
+                        label3.isHidden = false
+                        label2.text = profile2
+                        let profileURL = URL(string: profileUrl)
+                        button2.imageView?.kf.setImage(with: profileURL)
+                        if count > 2, let profile3 = profiles.documents[2].data()["profileName"] as? String, let profileUrl = profiles.documents[2].data()["profileImageURL"] as? String {
+                            button4.isHidden = false
+                            label4.isHidden = false
+                            label3.text = profile3
+                            let profileURL = URL(string: profileUrl)
+                            button3.imageView?.kf.setImage(with: profileURL)
+                            if count > 3, let profile4 = profiles.documents[3].data()["profileName"] as? String,let profileUrl = profiles.documents[3].data()["profileImageURL"] as? String {
+                                label4.text = profile4
+                                let profileURL = URL(string: profileUrl)
+                                button4.imageView?.kf.setImage(with: profileURL)
+                            }
+                        }
+                    }
+                }
+                
+            }
+        }
     }
+    
     
     // MARK: - Setup Methods
     func setupViews(){
@@ -258,7 +308,8 @@ class ProfileVC: UIViewController {
     // MARK: - Actions
     @objc func EditProfileButton(_ sender: UIButton) {
         let evc = EditProfileVC()
-        evc.documentId = documentId
+        evc.delegate = self
+        evc.count = count
         present(evc, animated: true)
     }
 }
