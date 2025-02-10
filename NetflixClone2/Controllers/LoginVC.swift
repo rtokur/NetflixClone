@@ -88,7 +88,9 @@ class LoginVC: UIViewController {
         
         setupViews()
         setupConstraints()
-        navigationItem.titleView?.largeContentImage = UIImage(named: "netflix")
+        let imageVieww = UIImageView(image: UIImage(named: "netflixx"))
+        imageVieww.contentMode = .scaleAspectFit
+        navigationItem.titleView = imageVieww
         navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
     }
@@ -106,6 +108,7 @@ class LoginVC: UIViewController {
         
         stackView.addArrangedSubview(SignUpButton)
     }
+    
     func setupConstraints() {
         stackView.snp.makeConstraints { make in
             make.center.equalTo(view.safeAreaLayoutGuide)
@@ -160,9 +163,11 @@ class LoginVC: UIViewController {
                         let pvc = ProfileVC()
                         let user = Auth.auth().currentUser
                         let email = user?.email
-                        pvc.modalPresentationStyle = .fullScreen
-                        pvc.isModalInPresentation = true
-                        self.present(pvc, animated: true)
+                        let navController = UINavigationController(rootViewController: pvc)
+                        navController.modalPresentationStyle = .fullScreen
+                        navController.isModalInPresentation = true
+
+                        self.present(navController, animated: true)
                     }
                     
                 }

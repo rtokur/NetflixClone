@@ -10,13 +10,18 @@ import SnapKit
 import FirebaseFirestore
 import FirebaseStorage
 import FirebaseAuth
-
+import Kingfisher
+// MARK: - ReloadData Protocol
 protocol ReloadData: AnyObject {
     func didUpdateProfile()
 }
 
-class EditProfileVC: UIViewController {
-    
+class EditProfileVC: UIViewController,ReLoadImage {
+    // MARK: - Methods
+    func ReloadImage(image: UIImage) {
+        imageView.image = image
+    }
+    // MARK: - Properties
     var delegate: ReloadData?
     var count: Int = 0
     let db = Firestore.firestore()
@@ -67,10 +72,8 @@ class EditProfileVC: UIViewController {
     
     let imageView: UIImageView = {
         let imageview = UIImageView()
-        imageview.image = UIImage(named: "profile-icon-1")
         imageview.contentMode = .scaleAspectFit
         imageview.layer.cornerRadius = 5
-        imageview.isUserInteractionEnabled = true
         imageview.clipsToBounds = true
         return imageview
     }()
@@ -84,6 +87,7 @@ class EditProfileVC: UIViewController {
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+        button.addTarget(self, action: #selector(IconAction), for: .touchUpInside)
         return button
     }()
     
@@ -102,6 +106,12 @@ class EditProfileVC: UIViewController {
         text.addTarget(self, action: #selector(textFieldDidBeginEditing), for: .editingChanged)
         return text
     }()
+    var profileName: String?
+    var profileImageURL : URL? = nil
+    var firstImage: UIImage?
+    var senderButton : Int = 0
+    
+    var iconList: [UIImage] = [UIImage(named: "profile-icon-1")!, UIImage(named: "profile-icon-2")!, UIImage(named: "profile-icon-3")!, UIImage(named: "profile-icon-4")!, UIImage(named: "profile-icon-5")!, UIImage(named: "profile-icon-6")!, UIImage(named: "profile-icon-7")!, UIImage(named: "profile-icon-8")!, UIImage(named: "profile-icon-9")!, UIImage(named: "profile-icon-10")!, UIImage(named: "profile-icon-11")!]
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -109,9 +119,6 @@ class EditProfileVC: UIViewController {
         view.backgroundColor = .systemBackground
         setupViews()
         setupConstraints()
-
-        
-        // Do any additional setup after loading the view.
     }
     // MARK: - Setup UI
     func setupViews(){
@@ -124,11 +131,19 @@ class EditProfileVC: UIViewController {
         stackView2.addArrangedSubview(profileLabel)
         
         stackView2.addArrangedSubview(saveButton)
-        
+        if let url = profileImageURL {
+            imageView.kf.setImage(with: url)
+            firstImage = imageView.image
+        }else{
+            imageView.image = iconList.randomElement()
+        }
         stackView.addArrangedSubview(imageView)
         
         view.addSubview(editButton)
         
+        if let name = profileName {
+            nameText.text = name
+        }
         stackView.addArrangedSubview(nameText)
     }
     
@@ -168,33 +183,50 @@ class EditProfileVC: UIViewController {
     }
     // MARK: - Actions
     @objc func textFieldDidBeginEditing(_ textField: UITextField) {
-        if textField.text == "" {
-            saveButton.isEnabled = false
-            saveButton.setTitleColor(.lightGray, for: .normal)
-        }else{
-            saveButton.isEnabled = true
-            saveButton.setTitleColor(.label, for: .normal)
+        if let name = profileName {
+            if textField.text == name {
+                saveButton.isEnabled = false
+                saveButton.setTitleColor(.lightGray, for: .normal)
+            } else{
+                saveButton.isEnabled = true
+                saveButton.setTitleColor(.label, for: .normal)
+            }
+        } else {
+            if textField.text == "" {
+                saveButton.isEnabled = false
+                saveButton.setTitleColor(.lightGray, for: .normal)
+            }else{
+                saveButton.isEnabled = true
+                saveButton.setTitleColor(.label, for: .normal)
+            }
         }
+        
     }
     
     @objc func saveButtonAction(){
-        let profileName = nameText.text
+        let profileNamee = nameText.text
         let profileImage = imageView.image
-        
         if let userId = Auth.auth().currentUser?.uid {
-            Task {
-                var downloadURL = ""
-                let ref = storage.reference().child("Profiles/\(userId)/profile\(count+1).jpg")
-                var data = Data()
-                data = profileImage!.jpegData(compressionQuality: 0.8)!
-                try await ref.putData(data, metadata: nil)
-                downloadURL = try await ref.downloadURL().absoluteString
-                
-                try await db.collection("Users").document(userId).collection("Profiles").document().setData(["profileName":profileName,"profileImageURL":downloadURL])
-                
-                delegate?.didUpdateProfile()
-                
-                dismiss(animated: true)
+            if let name = profileName {
+                Task{
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count)").updateData(["profileName":profileNamee])
+                    delegate?.didUpdateProfile()
+                    dismiss(animated: true)
+                }
+            } else{
+                Task {
+                    var downloadURL = ""
+                    let ref = storage.reference().child("Profiles/\(userId)/profile\(count+1).jpg")
+                    var data = Data()
+                    data = profileImage!.jpegData(compressionQuality: 0.2)!
+                    try await ref.putData(data, metadata: nil)
+                    downloadURL = try await ref.downloadURL().absoluteString
+                    
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count+1)").setData(["profileName":profileNamee,"profileImageURL":downloadURL])
+                    
+                    delegate?.didUpdateProfile()
+                    dismiss(animated: true)
+                }
             }
         }
     }
@@ -202,4 +234,12 @@ class EditProfileVC: UIViewController {
     @objc func cancelButtonAction(){
         dismiss(animated: true)
     }
+    
+    @objc func IconAction(_ sender: UIButton) {
+        let ivc = IconVC()
+        ivc.delegate = self
+        let nc = UINavigationController(rootViewController: ivc)
+        present(nc, animated: true)
+    }
 }
+

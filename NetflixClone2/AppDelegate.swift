@@ -19,7 +19,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         window = UIWindow()
         let navController = UINavigationController()
         navController.popToRootViewController(animated: true)
-        window?.rootViewController = LoginVC()
+        window?.rootViewController = MainTabBarViewController()
         window?.makeKeyAndVisible()
         return true
     }

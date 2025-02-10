@@ -8,9 +8,9 @@
 import UIKit
 import SnapKit
 import Kingfisher
-class DetailVC: UIViewController {
 
-    
+class DetailVC: UIViewController {
+    // MARK: - Properties
     let connection = Connection()
     // MARK: - UI Elements
     let imageView : UIImageView = {
@@ -90,6 +90,7 @@ class DetailVC: UIViewController {
         button.setTitleColor(.label, for: .normal)
         button.contentVerticalAlignment = .center
         button.contentHorizontalAlignment = .center
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
         button.imageView?.contentMode = .scaleAspectFit
         button.titleLabel?.font = UIFont.systemFont(ofSize: 9, weight: .bold)
         button.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
@@ -178,6 +179,7 @@ class DetailVC: UIViewController {
     var episode : [Episode]? = []
     var menuChildren : [UIMenuElement] = []
     
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -350,8 +352,7 @@ class DetailVC: UIViewController {
     }
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
-        
-        
+        print("favorites")
     }
     // MARK: - Setup Constraints
     func setupConstraints(){

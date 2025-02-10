@@ -18,7 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let window = UIWindow(windowScene: windowScene)
         let navController = UINavigationController()
         navController.popToRootViewController(animated: true)
-        window.rootViewController = LoginVC()
+        window.rootViewController = MainTabBarViewController()
         self.window = window
         window.makeKeyAndVisible()
     }

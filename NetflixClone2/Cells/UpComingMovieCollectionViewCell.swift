@@ -10,8 +10,9 @@ import SnapKit
 import Kingfisher
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
+    var movie: Movie?
     
-    
+    // MARK: - UI Elements
     let view : UIView = {
         let view = UIView()
         view.layer.cornerRadius = 8
@@ -59,6 +60,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
         favoriteButton.layer.cornerRadius = 3
+        favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
         favoriteButton.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
         favoriteButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
         favoriteButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
@@ -89,9 +91,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         stackview.spacing = 5
         return stackview
     }()
-    
-    var movie: Movie?
-    
+    // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -120,15 +120,14 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         
         stackView3.addArrangedSubview(favoriteButton)
     }
+    
     override func layoutSubviews() {
         super.layoutSubviews()
-        
         gradiantLayer.frame = view.bounds
     }
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
-
-        
+        print("favorites")
     }
     // MARK: - Play Button Action method
     @objc func playButtonAction(sender: UIButton!) {
