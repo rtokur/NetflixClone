@@ -8,10 +8,14 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import FirebaseFirestore
+import FirebaseAuth
 
 class DetailVC: UIViewController {
     // MARK: - Properties
     let connection = Connection()
+    let db = Firestore.firestore()
+
     // MARK: - UI Elements
     let imageView : UIImageView = {
         let imageView = UIImageView()
@@ -188,6 +192,11 @@ class DetailVC: UIViewController {
         setupConstraints()
         getData()
         registerCells()
+        
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .done, target: self, action: #selector(BackButton))
+        backButton.tintColor = .label
+        navigationItem.leftBarButtonItem = backButton
+        navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
     }
     // MARK: - Update CollectionView size
@@ -329,7 +338,42 @@ class DetailVC: UIViewController {
         }
         stackView.addArrangedSubview(descriptionLabel)
         
-        
+        if let userId = Auth.auth().currentUser?.uid {
+            Task{
+                let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                
+                let count = profile.documents.count
+                
+                guard count != 0 else { return }
+                
+                if let documentId = profile.documents[0].documentID as? String {
+                    if let movieId = movie?.id {
+                        let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
+                        
+                        let isExisted = movie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    } else if let serieId = serie?.id {
+                        let serie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").getDocument()
+                        
+                        let isExisted = serie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                        
+                    }
+                }
+            }
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
         stackView.addArrangedSubview(favoriteButton)
         
         stackView.addArrangedSubview(episodeLabel)
@@ -352,102 +396,146 @@ class DetailVC: UIViewController {
     }
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
-        print("favorites")
-    }
-    // MARK: - Setup Constraints
-    func setupConstraints(){
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
-        }
-        activityIndicator.snp.makeConstraints { make in
-            make.center.equalToSuperview()
-        }
-        stackView.snp.makeConstraints { make in
-            make.top.bottom.equalTo(scrollView.contentLayoutGuide)
-            make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
-            make.width.equalTo(scrollView.frameLayoutGuide)
-        }
-        imageView.snp.makeConstraints { make in
-            make.width.equalToSuperview()
-            make.height.equalTo(230)
-        }
-        view2.snp.makeConstraints { make in
-            make.height.equalTo(50)
-            make.center.equalTo(imageView)
-            make.width.equalTo(80)
-        }
-        playButton.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        titleLabel.snp.makeConstraints { make in
-            make.height.equalTo(18)
-        }
-        genresLabel.snp.makeConstraints { make in
-            make.height.equalTo(18)
-        }
-        stackView2.snp.makeConstraints { make in
-            make.height.equalTo(18)
-        }
-        dateLabel.snp.makeConstraints { make in
-            make.height.equalTo(18)
-        }
-        runtimeLabel.snp.makeConstraints { make in
-            make.height.equalTo(18)
-        }
-        
-        playButton2.snp.makeConstraints { make in
-            make.width.equalToSuperview()
-            make.height.equalTo(40)
-        }
-        descriptionLabel.snp.makeConstraints { make in
-            make.width.equalToSuperview()
-        }
-        favoriteButton.snp.makeConstraints { make in
-            make.height.equalTo(60)
-            make.width.equalTo(stackView).dividedBy(5.6)
-        }
-        episodeLabel.snp.makeConstraints { make in
-            make.height.equalTo(15)
-        }
-        seasonButton.snp.makeConstraints { make in
-            make.height.equalTo(30)
-            make.width.equalTo(stackView).dividedBy(3.4)
-        }
-        episodeCollectionView.snp.makeConstraints { make in
-            make.width.equalToSuperview()
-            make.height.equalTo(1)
+        if favoriteButton.currentImage == UIImage(systemName: "plus") {
+            if let userId = Auth.auth().currentUser?.uid {
+                Task {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    let count = profile.documents.count
+                    guard count != 0 else { return }
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id, let movieImage = movie?.posterURL{
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movieId, "movieName": movie?.title, "movieImageURL": "\(movieImage)"])
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        }else if let serieId = serie?.id, let serieImage = serie?.posterURL {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").setData(["serieId":serieId, "serieName": serie?.name, "serieImageURL": "\(serieImage)"])
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        }
+                    }
+                }
+                
+            }else{
+                let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+                present(alert, animated: true)
+            }
+            
+        } else {
+            if let userId = Auth.auth().currentUser?.uid {
+                Task {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    let count = profile.documents.count
+                    guard count != 0 else { return }
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }else if let serieId = serie?.id {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").delete()
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    }
+                }
+            }
         }
     }
-    
+        // MARK: - Setup Constraints
+        func setupConstraints(){
+            scrollView.snp.makeConstraints { make in
+                make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
+            }
+            activityIndicator.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+            }
+            stackView.snp.makeConstraints { make in
+                make.top.bottom.equalTo(scrollView.contentLayoutGuide)
+                make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
+                make.width.equalTo(scrollView.frameLayoutGuide)
+            }
+            imageView.snp.makeConstraints { make in
+                make.width.equalToSuperview()
+                make.height.equalTo(230)
+            }
+            view2.snp.makeConstraints { make in
+                make.height.equalTo(50)
+                make.center.equalTo(imageView)
+                make.width.equalTo(80)
+            }
+            playButton.snp.makeConstraints { make in
+                make.edges.equalToSuperview()
+            }
+            
+            titleLabel.snp.makeConstraints { make in
+                make.height.equalTo(18)
+            }
+            genresLabel.snp.makeConstraints { make in
+                make.height.equalTo(18)
+            }
+            stackView2.snp.makeConstraints { make in
+                make.height.equalTo(18)
+            }
+            dateLabel.snp.makeConstraints { make in
+                make.height.equalTo(18)
+            }
+            runtimeLabel.snp.makeConstraints { make in
+                make.height.equalTo(18)
+            }
+            
+            playButton2.snp.makeConstraints { make in
+                make.width.equalToSuperview()
+                make.height.equalTo(40)
+            }
+            descriptionLabel.snp.makeConstraints { make in
+                make.width.equalToSuperview()
+            }
+            favoriteButton.snp.makeConstraints { make in
+                make.height.equalTo(60)
+                make.width.equalTo(stackView).dividedBy(5.6)
+            }
+            episodeLabel.snp.makeConstraints { make in
+                make.height.equalTo(15)
+            }
+            seasonButton.snp.makeConstraints { make in
+                make.height.equalTo(30)
+                make.width.equalTo(stackView).dividedBy(3.4)
+            }
+            episodeCollectionView.snp.makeConstraints { make in
+                make.width.equalToSuperview()
+                make.height.equalTo(1)
+            }
+        }
+    //MARK: Actions
+    @objc func BackButton(_ sender: UIBarButtonItem) {
+        dismiss(animated: true)
+    }
+        
 }
-
-// MARK: - CollectionViewDelegate and DataSource Methods
-extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return episode?.count ?? 1
-    }
     
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
-        let episod = episode?[indexPath.row]
-        
-        if let url = episod?.stillURL {
-            cell.imageVieww.kf.setImage(with: url)
-            print(url)
+    // MARK: - CollectionViewDelegate and DataSource Methods
+extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
+        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+            return episode?.count ?? 1
         }
         
-        let name = episod?.name
-        let runtime = episod?.runtime
-        let overview = episod?.overview
+        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
+            let episod = episode?[indexPath.row]
+            
+            if let url = episod?.stillURL {
+                cell.imageVieww.kf.setImage(with: url)
+                print(url)
+            }
+            
+            let name = episod?.name
+            let runtime = episod?.runtime
+            let overview = episod?.overview
+            
+            cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
+            cell.runtimeLabel.text = "\(runtime ?? 0) min."
+            cell.overview.text = "\(overview ?? "")"
+            return cell
+        }
         
-        cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
-        cell.runtimeLabel.text = "\(runtime ?? 0) min."
-        cell.overview.text = "\(overview ?? "")"
-        return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-        print(episode?[indexPath.row].name,"bölüm")
-    }
+        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+            print(episode?[indexPath.row].name,"bölüm")
+        }
 }

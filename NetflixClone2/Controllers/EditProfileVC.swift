@@ -20,6 +20,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
     // MARK: - Methods
     func ReloadImage(image: UIImage) {
         imageView.image = image
+        checkForChanges()
     }
     // MARK: - Properties
     var delegate: ReloadData?
@@ -107,18 +108,30 @@ class EditProfileVC: UIViewController,ReLoadImage {
         return text
     }()
     var profileName: String?
-    var profileImageURL : URL? = nil
+    var profileImageURL : String?
     var firstImage: UIImage?
     var senderButton : Int = 0
-    
+    var isChanged: Bool = false
     var iconList: [UIImage] = [UIImage(named: "profile-icon-1")!, UIImage(named: "profile-icon-2")!, UIImage(named: "profile-icon-3")!, UIImage(named: "profile-icon-4")!, UIImage(named: "profile-icon-5")!, UIImage(named: "profile-icon-6")!, UIImage(named: "profile-icon-7")!, UIImage(named: "profile-icon-8")!, UIImage(named: "profile-icon-9")!, UIImage(named: "profile-icon-10")!, UIImage(named: "profile-icon-11")!]
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = .systemBackground
         setupViews()
         setupConstraints()
+        checkForChanges()
+    }
+    
+    func checkForChanges(){
+        if firstImage == imageView.image {
+            saveButton.isEnabled = false
+            saveButton.setTitleColor(.lightGray, for: .normal)
+            isChanged = false
+        } else{
+            saveButton.isEnabled = true
+            saveButton.setTitleColor(.label, for: .normal)
+            isChanged = true
+        }
     }
     // MARK: - Setup UI
     func setupViews(){
@@ -132,7 +145,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
         
         stackView2.addArrangedSubview(saveButton)
         if let url = profileImageURL {
-            imageView.kf.setImage(with: url)
+            imageView.kf.setImage(with: URL(string: url))
             firstImage = imageView.image
         }else{
             imageView.image = iconList.randomElement()
@@ -208,21 +221,36 @@ class EditProfileVC: UIViewController,ReLoadImage {
         let profileImage = imageView.image
         if let userId = Auth.auth().currentUser?.uid {
             if let name = profileName {
-                Task{
-                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count)").updateData(["profileName":profileNamee])
-                    delegate?.didUpdateProfile()
-                    dismiss(animated: true)
+                if isChanged {
+                    Task{
+                        var downloadURL = ""
+                        let ref = storage.reference().child("Profiles/\(userId)/profile\(count).jpg")
+                        var data = Data()
+                        data = profileImage!.jpegData(compressionQuality: 0.1)!
+                        try await ref.delete()
+                        try await ref.putDataAsync(data,metadata: nil)
+                        downloadURL = try await ref.downloadURL().absoluteString
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(senderButton)").updateData(["profileImageURL": downloadURL])
+                        delegate?.didUpdateProfile()
+                        dismiss(animated: true)
+                    }
+                } else{
+                    Task{
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(senderButton)").updateData(["profileName":profileNamee])
+                        delegate?.didUpdateProfile()
+                        dismiss(animated: true)
+                    }
                 }
             } else{
                 Task {
                     var downloadURL = ""
                     let ref = storage.reference().child("Profiles/\(userId)/profile\(count+1).jpg")
                     var data = Data()
-                    data = profileImage!.jpegData(compressionQuality: 0.2)!
+                    data = profileImage!.jpegData(compressionQuality: 0.1)!
                     try await ref.putData(data, metadata: nil)
                     downloadURL = try await ref.downloadURL().absoluteString
                     
-                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count+1)").setData(["profileName":profileNamee,"profileImageURL":downloadURL])
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count+1)").setData(["profileName":profileNamee,"profileImageURL":downloadURL, "isEnabled": false])
                     
                     delegate?.didUpdateProfile()
                     dismiss(animated: true)

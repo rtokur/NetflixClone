@@ -14,6 +14,7 @@ protocol CarouselViewDelegate : AnyObject {
 }
 
 class CarouselView: UIView, UICollectionViewDelegate {
+    
     // MARK: - Properties
     weak var delegate: CarouselViewDelegate?
     private var upcomingData : [Movie] = []
@@ -21,7 +22,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
     private var genres: [Genre] = []
     
     // MARK: - UI Elements
-    lazy var upComingMovieCollectionView: UICollectionView = {
+    private lazy var upComingMovieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 366, height: 580)
@@ -50,6 +51,10 @@ class CarouselView: UIView, UICollectionViewDelegate {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func layoutSubviews() {
+        setupViews()
+    }
     // MARK: - Setup Methods
     private func setupViews() {
         addSubview(upComingMovieCollectionView)
@@ -70,6 +75,14 @@ class CarouselView: UIView, UICollectionViewDelegate {
         let pageIndex = Int(scrollView.contentOffset.x / scrollView.frame.width)
         pageControl.currentPage = pageIndex
     }
+    
+    func reloadData(){
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return}
+            self.upComingMovieCollectionView.reloadData()
+        }
+    }
+
 }
 
 // MARK: - UICollectionViewDataSource
@@ -100,6 +113,7 @@ extension CarouselView: UICollectionViewDataSource {
         cell.configure(url: url)
         return cell
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let upcomingMovie = upcomingData[indexPath.row]
         delegate?.didSelectMovie(upcomingMovie)

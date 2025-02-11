@@ -8,10 +8,12 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import FirebaseAuth
+import FirebaseFirestore
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     var movie: Movie?
-    
+    let db = Firestore.firestore()
     // MARK: - UI Elements
     let view : UIView = {
         let view = UIView()
@@ -60,7 +62,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
         favoriteButton.layer.cornerRadius = 3
-        favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
         favoriteButton.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
         favoriteButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
         favoriteButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
@@ -118,6 +119,31 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         // MARK: - Play Button
         stackView3.addArrangedSubview(playButton)
         
+        if let userId = Auth.auth().currentUser?.uid {
+            Task{
+                let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                
+                let count = profile.documents.count
+                
+                guard count != 0 else { return }
+                
+                if let documentId = profile.documents[0].documentID as? String {
+                    if let movieId = movie?.id {
+                        let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
+                        
+                        let isExisted = movie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    }
+                }
+            }
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
         stackView3.addArrangedSubview(favoriteButton)
     }
     
@@ -127,7 +153,45 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     }
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
-        print("favorites")
+        if favoriteButton.currentImage == UIImage(systemName: "plus") {
+            Task{
+                if let userId = Auth.auth().currentUser?.uid {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    
+                    let count = profile.documents.count
+                    
+                    guard count != 0 else { return}
+                    
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id, let movieImage = movie?.posterURL {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movie?.id,"movieName":movie?.title,"movieImageURL":"\(movieImage)"])
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        }
+                        
+                    }
+                }
+            }
+        } else if favoriteButton.currentImage == UIImage(systemName: "checkmark"){
+            Task{
+                if let userId = Auth.auth().currentUser?.uid {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    
+                    let count = profile.documents.count
+                    
+                    guard count != 0 else { return}
+                    
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                        
+                    }
+                    
+                }
+            }
+            
+        }
     }
     // MARK: - Play Button Action method
     @objc func playButtonAction(sender: UIButton!) {

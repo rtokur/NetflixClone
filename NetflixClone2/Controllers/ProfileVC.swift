@@ -11,10 +11,7 @@ import FirebaseFirestore
 import FirebaseAuth
 import Kingfisher
 
-// MARK: - Reload Protocol
-protocol Reload {
-    func reload()
-}
+
 class ProfileVC: UIViewController, ReloadData{
     // MARK: - Methods
     func didUpdateProfile() {
@@ -22,13 +19,12 @@ class ProfileVC: UIViewController, ReloadData{
     }
     
     // MARK: - Properties
-    var delegate: Reload?
     let db = Firestore.firestore()
     var count : Int = 0
-    var profileURL: URL?
-    var profileURL2: URL?
-    var profileURL3: URL?
-    var profileURL4: URL?
+    var profileUrll: String = ""
+    var profileUrll2: String = ""
+    var profileUrll3: String = ""
+    var profileUrll4: String = ""
     
     // MARK: - UI Elements
     let stackView : UIStackView = {
@@ -222,8 +218,8 @@ class ProfileVC: UIViewController, ReloadData{
                 
                 if let profile = profiles.documents[0].data()["profileName"] as? String, let profileUrl = profiles.documents[0].data()["profileImageURL"] as? String {
                     label1.text = profile
-                    print(profileUrl)
-                    profileURL = URL(string: profileUrl)
+                    profileUrll = profileUrl
+                    let profileURL = URL(string: profileUrl)
                     button.setImage(UIImage(systemName: ""), for: .normal)
                     button.kf.setBackgroundImage(with: profileURL, for: .normal)
                     button2.isHidden = false
@@ -232,22 +228,22 @@ class ProfileVC: UIViewController, ReloadData{
                         button3.isHidden = false
                         label3.isHidden = false
                         label2.text = profile2
-                        print(profileUrl2)
-                        profileURL2 = URL(string: profileUrl2)
+                        profileUrll2 = profileUrl2
+                        let profileURL2 = URL(string: profileUrl2)
                         button2.setImage(UIImage(systemName: ""), for: .normal)
                         button2.kf.setBackgroundImage(with: profileURL2, for: .normal)
                         if count > 2, let profile3 = profiles.documents[2].data()["profileName"] as? String, let profileUrl3 = profiles.documents[2].data()["profileImageURL"] as? String {
                             button4.isHidden = false
                             label4.isHidden = false
                             label3.text = profile3
-                            print(profileUrl3)
-                            profileURL3 = URL(string: profileUrl3)
+                            profileUrll3 = profileUrl3
+                            let profileURL3 = URL(string: profileUrl3)
                             button3.setImage(UIImage(systemName: ""), for: .normal)
                             button3.kf.setBackgroundImage(with: profileURL3, for: .normal)
                             if count > 3, let profile4 = profiles.documents[3].data()["profileName"] as? String,let profileUrl4 = profiles.documents[3].data()["profileImageURL"] as? String {
                                 label4.text = profile4
-                                print(profileUrl4)
-                                profileURL4 = URL(string: profileUrl4)
+                                profileUrll4 = profileUrl4
+                                let profileURL4 = URL(string: profileUrl4)
                                 button4.setImage(UIImage(systemName: ""), for: .normal)
                                 button4.kf.setBackgroundImage(with: profileURL4, for: .normal)
                             }
@@ -358,40 +354,87 @@ class ProfileVC: UIViewController, ReloadData{
             let evc = EditProfileVC()
             if sender.tag == 1 {
                 evc.profileName = label1.text
-                evc.profileImageURL = profileURL
+                evc.senderButton = 1
+                evc.profileImageURL = profileUrll
             } else if sender.tag == 2{
                 evc.profileName = label2.text
-                evc.profileImageURL = profileURL2
+                evc.senderButton = 2
+                evc.profileImageURL = profileUrll2
             }else if sender.tag == 3{
                 evc.profileName = label3.text
-                evc.profileImageURL = profileURL3
+                evc.senderButton = 3
+                evc.profileImageURL = profileUrll3
             } else if sender.tag == 4{
                 evc.profileName = label4.text
-                evc.profileImageURL = profileURL4
+                evc.senderButton = 4
+                evc.profileImageURL = profileUrll4
             }
             evc.delegate = self
             evc.count = count
             present(evc, animated: true)
         }
         else {
-            let mvc = MainTabBarViewController()
-            mvc.modalPresentationStyle = .fullScreen
-            mvc.isModalInPresentation = true
+            let ls = LaunchScreen()
+            ls.modalPresentationStyle = .fullScreen
+            ls.isModalInPresentation = true
             if sender.tag == 1 {
-                mvc.profileName = label1.text ?? ""
-                mvc.profileImage = button.currentImage
+                Task{
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled":true])
+                        if count > 1 {
+                            try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
+                            if count > 2 {
+                                try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
+                                if count > 3 {
+                                    try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
+                                }
+                            }
+                        }
+                    }else{
+                        return
+                    }
+                }
             } else if sender.tag == 2{
-                mvc.profileName = label2.text ?? ""
-                mvc.profileImage = button2.currentImage
+                Task{
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
+                        if count > 2 {
+                            try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
+                            if count > 3{
+                                try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
+                            }
+                        }
+                    }else{
+                        return
+                    }
+                }
             } else if sender.tag == 3{
-                mvc.profileName = label3.text ?? ""
-                mvc.profileImage = button3.currentImage
+                Task{
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled":true])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
+                        if count > 3 {
+                            try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
+                        }
+                    }else{
+                        return
+                    }
+                }
             } else{
-                mvc.profileName = label4.text ?? ""
-                mvc.profileImage = button4.currentImage
+                Task{
+                    if let userId = Auth.auth().currentUser?.uid {
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled":true])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
+                        try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
+                    }else{
+                        return
+                    }
+                }
             }
-            delegate?.reload()
-            present(mvc, animated: true)
+            present(ls, animated: true)
         }
     }
     
@@ -400,16 +443,16 @@ class ProfileVC: UIViewController, ReloadData{
             sender.title = "Okey"
             if button.currentImage != UIImage(systemName: "plus") {
                 button.setImage(UIImage(systemName: "pencil"), for: .normal)
-                button.kf.setBackgroundImage(with: profileURL, for: .normal)
+                button.kf.setBackgroundImage(with: URL(string: profileUrll), for: .normal)
                 if button2.currentImage != UIImage(systemName: "plus") {
                     button2.setImage(UIImage(systemName: "pencil"), for: .normal)
-                    button2.kf.setBackgroundImage(with: profileURL2, for: .normal)
+                    button2.kf.setBackgroundImage(with: URL(string: profileUrll2), for: .normal)
                     if button3.currentImage != UIImage(systemName: "plus") {
                         button3.setImage(UIImage(systemName: "pencil"), for: .normal)
-                        button3.kf.setBackgroundImage(with: profileURL3, for: .normal)
+                        button3.kf.setBackgroundImage(with: URL(string: profileUrll3), for: .normal)
                         if button4.currentImage != UIImage(systemName: "plus") {
                             button4.setImage(UIImage(systemName: "pencil"), for: .normal)
-                            button4.kf.setBackgroundImage(with: profileURL4, for: .normal)
+                            button4.kf.setBackgroundImage(with: URL(string: profileUrll4), for: .normal)
                         }
                     }
                 }

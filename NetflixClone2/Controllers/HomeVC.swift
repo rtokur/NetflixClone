@@ -8,11 +8,15 @@ import UIKit
 import SnapKit
 import Kingfisher
 class HomeVC: UIViewController, CarouselViewDelegate {
+    
     // MARK: - Protocol from CarouselView
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
         dVC.movie = upcoming
-        present(dVC, animated: true)
+        let nvc = UINavigationController(rootViewController: dVC)
+        nvc.modalPresentationStyle = .fullScreen
+        nvc.isModalInPresentation = true
+        present(nvc, animated: true)
     }
     
     // MARK: - Properties
@@ -85,7 +89,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     lazy var genres: [Genre] = []
     private lazy var popularSeries: [Serie] = []
     
-    let upComingView = CarouselView()
+    var upComingView = CarouselView()
     
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
@@ -116,9 +120,12 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         getData()
         registerCells()
     }
+    
     override func viewWillAppear(_ animated: Bool) {
-        upComingView.upComingMovieCollectionView.reloadData()
+        super.viewWillAppear(animated)
+        upComingView.reloadData()
     }
+    
     //MARK: -Register Cells for loading
     private func registerCells() {
         popularMovieCollectionView.register(PopularMovieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularMovieCollectionViewCell")
@@ -139,7 +146,6 @@ class HomeVC: UIViewController, CarouselViewDelegate {
             topRatedCollectionView.reloadData()
             activityIndicator.stopAnimating()
         }
-        
     }
     // MARK: - Setup Views
     private func setupViews()  {
@@ -151,6 +157,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         scrollView.addSubview(stackView)
         
         upComingView.delegate = self
+        
         stackView.addArrangedSubview(upComingView)
         
         stackView.addArrangedSubview(popularTitleLabel)
