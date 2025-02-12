@@ -20,6 +20,8 @@ class CarouselView: UIView, UICollectionViewDelegate {
     private var upcomingData : [Movie] = []
     private var currentPage = 0
     private var genres: [Genre] = []
+    var documentId: String = ""
+    var userId: String = ""
     
     // MARK: - UI Elements
     private lazy var upComingMovieCollectionView: UICollectionView = {
@@ -75,7 +77,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
         let pageIndex = Int(scrollView.contentOffset.x / scrollView.frame.width)
         pageControl.currentPage = pageIndex
     }
-    
+    // MARK: - Reload Data
     func reloadData(){
         DispatchQueue.main.async { [weak self] in
             guard let self else { return}
@@ -109,6 +111,8 @@ extension CarouselView: UICollectionViewDataSource {
                 }
             }
         }
+        cell.userId = userId
+        cell.documentId = documentId
         cell.genreLabel.text = genreName.joined(separator: " • ")
         cell.configure(url: url)
         return cell

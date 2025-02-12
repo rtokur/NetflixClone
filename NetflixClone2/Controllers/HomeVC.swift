@@ -13,6 +13,8 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
         dVC.movie = upcoming
+        dVC.userId = userId
+        dVC.documentId = documentId
         let nvc = UINavigationController(rootViewController: dVC)
         nvc.modalPresentationStyle = .fullScreen
         nvc.isModalInPresentation = true
@@ -21,6 +23,16 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     
     // MARK: - Properties
     let connection = Connection()
+    private lazy var popularMovies: [Movie] = []
+    private lazy var topRated: [Movie] = []
+    lazy var upComing: [Movie] = []
+    lazy var genres: [Genre] = []
+    private lazy var popularSeries: [Serie] = []
+    var userId: String = ""
+    var upComingView = CarouselView()
+    var documentId: String = ""
+    var profileName: String = ""
+    
     private let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -83,14 +95,6 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         return activityIndicator
     }()
     
-    private lazy var popularMovies: [Movie] = []
-    private lazy var topRated: [Movie] = []
-    lazy var upComing: [Movie] = []
-    lazy var genres: [Genre] = []
-    private lazy var popularSeries: [Serie] = []
-    
-    var upComingView = CarouselView()
-    
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
         topRatedTitleLabel.textColor = .label
@@ -110,10 +114,25 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         popularSerieTitleLabel.text = "Popular Series"
         return popularSerieTitleLabel
     }()
+    
+    let nameLabel : UILabel = {
+        let label = UILabel()
+        label.textColor = .label
+        label.font = .boldSystemFont(ofSize: 23)
+        return label
+    }()
+    
+
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        nameLabel.text = "For \(profileName)"
+        navigationItem.titleView = nameLabel
+        let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
+        searchButton.tintColor = .label
+        navigationItem.rightBarButtonItems = [searchButton]
+        navigationController?.navigationBar.isTranslucent = true
         activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
@@ -157,7 +176,8 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         scrollView.addSubview(stackView)
         
         upComingView.delegate = self
-        
+        upComingView.documentId = documentId
+        upComingView.userId = userId
         stackView.addArrangedSubview(upComingView)
         
         stackView.addArrangedSubview(popularTitleLabel)
@@ -202,7 +222,6 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         popularTitleLabel.snp.makeConstraints { make in
             make.height.equalTo(25)
         }
-        
         popularMovieCollectionView.snp.makeConstraints { make in
             make.height.equalTo(175)
         }
@@ -221,11 +240,19 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         
     }
 
+//    MARK: Actions
+    @objc func searchButton(_ sender: UIBarButtonItem) {
+        let svc = SearchVC()
+        svc.modalPresentationStyle = .fullScreen
+        svc.isModalInPresentation = true
+        present(svc, animated: true)
+    }
 }
 
 
 // MARK: - UICollectionView Delegate & DataSource
 extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topRatedCollectionView {
             return topRated.count
@@ -235,6 +262,7 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         return popularMovies.count
         
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == topRatedCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TopRatedMovieCollectionViewCell", for: indexPath) as! TopRatedMovieCollectionViewCell
@@ -271,13 +299,19 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         let dVC = DetailVC()
         if collectionView == popularSerieCollectionView {
             dVC.serie = popularSeries[indexPath.row]
+            dVC.userId = userId
+            dVC.documentId = documentId
             self.present(dVC, animated: true, completion: nil)
         }else{
             if collectionView == topRatedCollectionView {
                 dVC.movie = topRated[indexPath.row]
+                dVC.userId = userId
+                dVC.documentId = documentId
             }
             else {
                 dVC.movie = popularMovies[indexPath.row]
+                dVC.userId = userId
+                dVC.documentId = documentId
             }
             self.present(dVC, animated: true, completion: nil)
         }

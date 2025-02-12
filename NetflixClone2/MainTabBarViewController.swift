@@ -13,22 +13,24 @@ class MainTabBarViewController: UITabBarController{
     var profileName: String = ""
     var profileImageURL: String = ""
     var userId: String = ""
+    var documentId: String = ""
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
     }
     
+    // MARK: - Setup Methods
     func setupViews(){
         //MARK: -Main Controllers
-        let vc1 = UINavigationController(rootViewController: HomeVC())
-        let vc2 = UINavigationController(rootViewController: SearchVC())
+        var vc1 = UINavigationController(rootViewController: HomeVC())
+        var vc2 = UINavigationController(rootViewController: SearchVC())
         var vc3 = UINavigationController(rootViewController: LoginVC())
 
         //MARK: -TabBar Symbols
         vc1.tabBarItem.image = UIImage(systemName: "house")
         vc2.tabBarItem.image = UIImage(systemName: "magnifyingglass")
-        vc3.tabBarItem.image = UIImage(named: "unknown")
+        vc3.tabBarItem.image = UIImage(systemName: "person")
         
         //MARK: -TabBar Titles
         vc1.title = "Home"
@@ -38,11 +40,23 @@ class MainTabBarViewController: UITabBarController{
         tabBar.tintColor = .label
         
         if userId != "" {
-            vc3 = UINavigationController(rootViewController: MyProfileVC())
+            let hvc = HomeVC()
+            hvc.userId = userId
+            hvc.documentId = documentId
+            hvc.profileName = profileName
+            vc1 = UINavigationController(rootViewController: hvc)
+            vc1.title = "Home"
+            vc1.tabBarItem.image = UIImage(systemName: "house")
+            let mpvc3 = MyProfileVC()
             let data = try? Data(contentsOf: URL(string: profileImageURL)!)
             guard let data else { return }
             let image = UIImage(data: data)
             let resized = image?.resize(25, 25)
+            mpvc3.profileImage = profileImageURL
+            mpvc3.profileName = profileName
+            mpvc3.userId = userId
+            mpvc3.documentId = documentId
+            vc3 = UINavigationController(rootViewController: mpvc3)
             vc3.tabBarItem.image = resized
             vc3.title = profileName
         }

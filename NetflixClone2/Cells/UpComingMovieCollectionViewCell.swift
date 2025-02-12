@@ -13,6 +13,8 @@ import FirebaseFirestore
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     var movie: Movie?
+    var userId: String = ""
+    var documentId: String = ""
     let db = Firestore.firestore()
     // MARK: - UI Elements
     let view : UIView = {
@@ -99,9 +101,15 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         setupConstraints()
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        gradiantLayer.frame = view.bounds
+    }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
     // MARK: - Setup Views
     private func setupViews() {
         contentView.addSubview(imageView)
@@ -119,16 +127,12 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         // MARK: - Play Button
         stackView3.addArrangedSubview(playButton)
         
-        if let userId = Auth.auth().currentUser?.uid {
-            Task{
-                let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
-                
-                let count = profile.documents.count
-                
-                guard count != 0 else { return }
-                
-                if let documentId = profile.documents[0].documentID as? String {
-                    if let movieId = movie?.id {
+        if userId != "" {
+            print(userId)
+            if documentId != "" {
+                print(documentId)
+                if let movieId = movie?.id {
+                    Task{
                         let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
                         
                         let isExisted = movie.exists
@@ -147,10 +151,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         stackView3.addArrangedSubview(favoriteButton)
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        gradiantLayer.frame = view.bounds
-    }
+
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
         if favoriteButton.currentImage == UIImage(systemName: "plus") {
@@ -225,7 +226,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         favoriteButton.snp.makeConstraints { make in
             make.height.equalToSuperview()
         }
-
     }
     
     // MARK: - Configure ImageView

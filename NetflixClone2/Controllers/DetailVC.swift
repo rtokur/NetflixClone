@@ -15,7 +15,9 @@ class DetailVC: UIViewController {
     // MARK: - Properties
     let connection = Connection()
     let db = Firestore.firestore()
-
+    var userId: String = ""
+    var documentId: String = ""
+    
     // MARK: - UI Elements
     let imageView : UIImageView = {
         let imageView = UIImageView()
@@ -338,15 +340,9 @@ class DetailVC: UIViewController {
         }
         stackView.addArrangedSubview(descriptionLabel)
         
-        if let userId = Auth.auth().currentUser?.uid {
+        if userId != "" {
             Task{
-                let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
-                
-                let count = profile.documents.count
-                
-                guard count != 0 else { return }
-                
-                if let documentId = profile.documents[0].documentID as? String {
+                if documentId != "" {
                     if let movieId = movie?.id {
                         let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
                         
@@ -397,7 +393,7 @@ class DetailVC: UIViewController {
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
         if favoriteButton.currentImage == UIImage(systemName: "plus") {
-            if let userId = Auth.auth().currentUser?.uid {
+            if userId != "" {
                 Task {
                     let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
                     let count = profile.documents.count
@@ -412,7 +408,6 @@ class DetailVC: UIViewController {
                         }
                     }
                 }
-                
             }else{
                 let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "OK", style: .cancel))
@@ -420,7 +415,7 @@ class DetailVC: UIViewController {
             }
             
         } else {
-            if let userId = Auth.auth().currentUser?.uid {
+            if userId != "" {
                 Task {
                     let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
                     let count = profile.documents.count
