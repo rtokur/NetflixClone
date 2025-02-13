@@ -7,11 +7,12 @@
 
 import UIKit
 import SnapKit
+
 // MARK: - ReloadImage Protocol
 protocol ReLoadImage: AnyObject {
     func ReloadImage(image:UIImage)
 }
-//
+
 class IconVC: UIViewController {
     // MARK: - Properties
     var delegate: ReLoadImage?
@@ -70,6 +71,7 @@ class IconVC: UIViewController {
         backButton.tintColor = .label
         navigationItem.leftBarButtonItem = backButton
     }
+    
     // MARK: - Setup Methods
     func registerCells(){
         iconCollectionView.register(IconCollectionViewCell.self, forCellWithReuseIdentifier: "IconCollectionViewCell")
@@ -99,14 +101,14 @@ class IconVC: UIViewController {
             make.height.equalTo(17)
         }
         iconCollectionView.snp.makeConstraints { make in
-            make.height.equalTo(100)
+            make.height.equalTo(500)
         }
     }
     // MARK: - Actions
     @objc func BackButton(_ sender: UIBarButtonItem) {
         dismiss(animated: true)
     }
-
+    
 }
 // MARK: - UICollectionViewDelegate & UICollectionViewDataSource
 extension IconVC: UICollectionViewDelegate,UICollectionViewDataSource {

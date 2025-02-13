@@ -11,8 +11,8 @@ import FirebaseAuth
 import FirebaseFirestore
 
 class SignUpVC: UIViewController {
-    // MARK: - Properties
     
+    // MARK: - Properties
     let db = Firestore.firestore()
     
     // MARK: - UI Elements
@@ -165,6 +165,6 @@ class SignUpVC: UIViewController {
             alert.addAction(UIAlertAction(title: "OK", style: .cancel))
             present(alert, animated: true)
         }
-
+        
     }
 }

@@ -8,10 +8,22 @@
 import UIKit
 import SnapKit
 import Kingfisher
-class FavoriteVC: UIViewController {
+import FirebaseFirestore
+
+class FavoriteVC: UIViewController,UpdateCollectionView {
+    // MARK: Methods
+    func update() {
+        getFavorites()
+    }
+    
     // MARK: - Properties
     var count: Int = 0
+    var userId: String = ""
+    var documentId: String = ""
+    let db = Firestore.firestore()
+    var favorites: [Favorite] = []
     
+    // MARK: - UI Elements
     let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -41,18 +53,21 @@ class FavoriteVC: UIViewController {
     let navLabel: UILabel = {
         let label = UILabel()
         label.text = "Favorites"
-        label.textAlignment = .center
         label.font = .boldSystemFont(ofSize: 17)
         label.textColor = .label
-        label.numberOfLines = 0
         return label
     }()
+    
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
+        getFavorites()
         setupViews()
         setupConstraints()
-
+        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .done, target: self, action: #selector(BackButton))
+        backButton.tintColor = .label
+        navigationItem.leftBarButtonItem = backButton
         navigationItem.titleView = navLabel
         let editButton = UIBarButtonItem(title: "Edit", style: .done, target: self, action: #selector(editButtonAction))
         editButton.tintColor = .label
@@ -60,6 +75,39 @@ class FavoriteVC: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    
+    //MARK: Get Favorites from Firebase
+    func getFavorites(){
+        if userId != "" {
+            if documentId != "" {
+                favorites.removeAll()
+                Task{
+                    let favoritess = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").getDocuments()
+                    
+                    let count = favoritess.documents.count
+                    
+                    guard count != 0 else { return }
+                    
+                    for favorite in favoritess.documents {
+                        if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieImageURL"] as? String, let movieId = favorite.data()["movieId"] as? Int {
+                            let favoritee = Favorite(id: movieId, URL: movieImage, name: name)
+                            favorites.append(favoritee)
+                            
+                        } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieImageURL"] as? String, let serieId = favorite.data()["serieId"] as? Int {
+                            let favoritee = Favorite(id: serieId, URL: serieImage, name: name)
+                            favorites.append(favoritee)
+                        }
+                    }
+                    FavoriteCollectionView.reloadData()
+                }
+            }
+        }
+    }
+    
     // MARK: - Setup Methods
     func setupViews() {
         view.addSubview(stackView)
@@ -71,6 +119,7 @@ class FavoriteVC: UIViewController {
         FavoriteCollectionView.dataSource = self
         stackView.addArrangedSubview(FavoriteCollectionView)
     }
+    
     // MARK: - Setup Constraints
     func setupConstraints() {
         stackView.snp.makeConstraints { make in
@@ -83,24 +132,48 @@ class FavoriteVC: UIViewController {
             make.width.equalToSuperview()
         }
     }
-
-    override func viewWillAppear(_ animated: Bool) {
-        FavoriteCollectionView.reloadData()
-    }
-    // MARK: - Edit Button Action method
+    
+    // MARK: - Actions
     @objc func editButtonAction(_ sender: UIButton) {
         count += 1
+        if count % 2 == 1 {
+            navigationItem.rightBarButtonItem?.title = "Okey"
+        } else {
+            navigationItem.rightBarButtonItem?.title = "Edit"
+        }
         FavoriteCollectionView.reloadData()
     }
+    
+    @objc func BackButton(_ sender: UIBarButtonItem) {
+        dismiss(animated: true)
+    }
 }
+
 // MARK: - UICollectionView Delegate & DataSource
 extension FavoriteVC : UICollectionViewDelegate,UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 0
+        return favorites.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FavoriteCollectionViewCell", for: indexPath) as! FavoriteCollectionViewCell
+        let fav = favorites[indexPath.row]
+        if let url = fav.URL {
+            cell.imageView.kf.setImage(with: URL(string: url))
+        }
+        cell.count = count
+        if count % 2 == 1 {
+            cell.playButton.setImage(UIImage(systemName: "trash"), for: .normal)
+            cell.playButton.tintColor = .red
+        } else {
+            cell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
+            cell.playButton.tintColor = .label
+        }
+        cell.movieId = fav.id!
+        cell.documentId = documentId
+        cell.userId = userId
+        cell.titleLabel.text = fav.name
+        cell.delegate = self
         return cell
     }
     

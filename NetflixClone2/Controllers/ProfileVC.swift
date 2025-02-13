@@ -8,11 +8,10 @@
 import UIKit
 import SnapKit
 import FirebaseFirestore
-import FirebaseAuth
 import Kingfisher
 
-
 class ProfileVC: UIViewController, ReloadData{
+    
     // MARK: - Methods
     func didUpdateProfile() {
         viewWillAppear(true)
@@ -25,6 +24,7 @@ class ProfileVC: UIViewController, ReloadData{
     var profileUrll2: String = ""
     var profileUrll3: String = ""
     var profileUrll4: String = ""
+    var userId: String = ""
     
     // MARK: - UI Elements
     let stackView : UIStackView = {
@@ -185,11 +185,11 @@ class ProfileVC: UIViewController, ReloadData{
         label.textColor = .label
         return label
     }()
-
-
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
+        view.backgroundColor = .systemBackground
         getProfileData()
         setupViews()
         setupConstraints()
@@ -204,15 +204,16 @@ class ProfileVC: UIViewController, ReloadData{
         super.viewWillAppear(animated)
         viewDidLoad()
     }
+    
     // MARK: - Firebase Methods
     func getProfileData(){
-        if let userId = Auth.auth().currentUser?.uid {
+        if userId != "" {
             Task{
                 let profiles = try await db.collection("Users").document(userId).collection("Profiles").getDocuments()
                 
                 count = profiles.documents.count
                 
-                guard count != 0 else {                    
+                guard count != 0 else {
                     return
                 }
                 
@@ -253,7 +254,6 @@ class ProfileVC: UIViewController, ReloadData{
             }
         }
     }
-    
     
     // MARK: - Setup Methods
     func setupViews(){
@@ -349,28 +349,30 @@ class ProfileVC: UIViewController, ReloadData{
             let evc = EditProfileVC()
             evc.delegate = self
             evc.count = count
+            evc.userId = userId
             present(evc, animated: true)
         }else if sender.currentImage == UIImage(systemName: "pencil"){
             let evc = EditProfileVC()
             if sender.tag == 1 {
-                evc.profileName = label1.text
+                evc.profileName = label1.text ?? ""
                 evc.senderButton = 1
                 evc.profileImageURL = profileUrll
             } else if sender.tag == 2{
-                evc.profileName = label2.text
+                evc.profileName = label2.text ?? ""
                 evc.senderButton = 2
                 evc.profileImageURL = profileUrll2
             }else if sender.tag == 3{
-                evc.profileName = label3.text
+                evc.profileName = label3.text ?? ""
                 evc.senderButton = 3
                 evc.profileImageURL = profileUrll3
             } else if sender.tag == 4{
-                evc.profileName = label4.text
+                evc.profileName = label4.text ?? ""
                 evc.senderButton = 4
                 evc.profileImageURL = profileUrll4
             }
             evc.delegate = self
             evc.count = count
+            evc.userId = userId
             present(evc, animated: true)
         }
         else {
@@ -379,62 +381,29 @@ class ProfileVC: UIViewController, ReloadData{
             ls.isModalInPresentation = true
             if sender.tag == 1 {
                 Task{
-                    if let userId = Auth.auth().currentUser?.uid {
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled":true])
-                        if count > 1 {
-                            try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
-                            if count > 2 {
-                                try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
-                                if count > 3 {
-                                    try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
-                                }
-                            }
-                        }
-                    }else{
-                        return
-                    }
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
+                    ls.image = profileUrll
+                    present(ls, animated: true)
                 }
-            } else if sender.tag == 2{
+            } else if sender.tag == 2 {
                 Task{
-                    if let userId = Auth.auth().currentUser?.uid {
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
-                        if count > 2 {
-                            try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
-                            if count > 3{
-                                try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
-                            }
-                        }
-                    }else{
-                        return
-                    }
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
+                    ls.image = profileUrll2
+                    present(ls, animated: true)
                 }
-            } else if sender.tag == 3{
+            } else if sender.tag == 3 {
                 Task{
-                    if let userId = Auth.auth().currentUser?.uid {
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled":true])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
-                        if count > 3 {
-                            try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled": false])
-                        }
-                    }else{
-                        return
-                    }
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
+                    ls.image = profileUrll3
+                    present(ls, animated: true)
                 }
-            } else{
+            } else {
                 Task{
-                    if let userId = Auth.auth().currentUser?.uid {
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile4").updateData(["isEnabled":true])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile1").updateData(["isEnabled": false])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile2").updateData(["isEnabled": false])
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile3").updateData(["isEnabled": false])
-                    }else{
-                        return
-                    }
+                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(sender.tag)").updateData(["isEnabled":true])
+                    ls.image = profileUrll4
+                    present(ls, animated: true)
                 }
             }
-            present(ls, animated: true)
         }
     }
     

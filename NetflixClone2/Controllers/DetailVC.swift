@@ -27,23 +27,6 @@ class DetailVC: UIViewController {
         return imageView
     }()
     
-    let view2 : UIView = {
-        let view2 = UIView()
-        view2.layer.cornerRadius = 8
-        view2.clipsToBounds = true
-        return view2
-    }()
-    
-    let playButton : UIButton = {
-        let playButton = UIButton()
-        playButton.backgroundColor = .white.withAlphaComponent(0.9)
-        playButton.setImage(UIImage(systemName: "play.fill"),for: UIControl.State.normal)
-        playButton.tintColor = .black
-        playButton.layer.cornerRadius = 8
-        playButton.addTarget(DetailVC.self, action: #selector(playButtonAction), for: .touchUpInside)
-        return playButton
-    }()
-    
     let scrollView : UIScrollView = {
         let scrollView = UIScrollView()
         scrollView.showsVerticalScrollIndicator = false
@@ -201,6 +184,7 @@ class DetailVC: UIViewController {
         navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
     }
+    
     // MARK: - Update CollectionView size
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
@@ -209,6 +193,7 @@ class DetailVC: UIViewController {
             make.height.equalTo(episodeCollectionView.collectionViewLayout.collectionViewContentSize.height)
         }
     }
+    
     // MARK: - Make call for movie or serie detail from API
     func getData(){
         if let movieId = movie?.id {
@@ -218,6 +203,12 @@ class DetailVC: UIViewController {
                 let hours = runtime / 60
                 let minutes = runtime / 60 % 60
                 runtimeLabel.text = "\(hours) hours \(minutes) minutes"
+                // ImageView's image setting
+                if let posterPath = detail?.backdropPath {
+                    if let url = detail?.posterURL {
+                        self.imageView.kf.setImage(with: url)
+                    }
+                }
                 if let genres2 = detail?.genres {
                     genres = genres2
                     var genresName : [String] = []
@@ -236,6 +227,12 @@ class DetailVC: UIViewController {
                 
                 if let numberOfSeasons = detail?.numberOfSeasons, numberOfSeasons != 1 {
                     runtimeLabel.text = "\(numberOfSeasons) Seasons"
+                    if let posterPath = detail?.backdropPath  {
+                        print(posterPath)
+                        if let url = detail?.posterURL {
+                            self.imageView.kf.setImage(with: url)
+                        }
+                    }
                     if let genres2 = detail?.genres {
                         genres = genres2
                         var genresName : [String] = []
@@ -261,6 +258,12 @@ class DetailVC: UIViewController {
                     
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
                     runtimeLabel.text = "\(numberOfEpisodes) Episodes"
+                    if let posterPath = detail?.backdropPath  {
+                        print(posterPath)
+                        if let url = detail?.posterURL {
+                            self.imageView.kf.setImage(with: url)
+                        }
+                    }
                     if let genres2 = detail?.genres {
                         genres = genres2
                         var genresName : [String] = []
@@ -275,6 +278,7 @@ class DetailVC: UIViewController {
             }
         }
     }
+    
     //MARK: -Register Cell for loading
     private func registerCells() {
         episodeCollectionView.register(EpisodesCollectionViewCell.self, forCellWithReuseIdentifier: "EpisodesCollectionViewCell")
@@ -286,22 +290,7 @@ class DetailVC: UIViewController {
         
         scrollView.addSubview(stackView)
         
-        // ImageView's image setting
-        if let posterPath = serie?.posterPath  {
-            if let url = serie?.posterURL {
-                self.imageView.kf.setImage(with: url)
-            }
-        }else if let posterPath = movie?.posterPath  {
-            if let url = movie?.posterURL {
-                self.imageView.kf.setImage(with: url)
-            }
-            
-        }
         stackView.addArrangedSubview(imageView)
-        
-        view.addSubview(view2)
-        
-        view2.addSubview(playButton)
         
         // Title Label text setting
         if let title = movie?.title {
@@ -390,6 +379,7 @@ class DetailVC: UIViewController {
     @objc func playButtonAction(sender: UIButton) {
         print("play button tapped")
     }
+    
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
         if favoriteButton.currentImage == UIImage(systemName: "plus") {
@@ -433,104 +423,95 @@ class DetailVC: UIViewController {
             }
         }
     }
-        // MARK: - Setup Constraints
-        func setupConstraints(){
-            scrollView.snp.makeConstraints { make in
-                make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
-            }
-            activityIndicator.snp.makeConstraints { make in
-                make.center.equalToSuperview()
-            }
-            stackView.snp.makeConstraints { make in
-                make.top.bottom.equalTo(scrollView.contentLayoutGuide)
-                make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
-                make.width.equalTo(scrollView.frameLayoutGuide)
-            }
-            imageView.snp.makeConstraints { make in
-                make.width.equalToSuperview()
-                make.height.equalTo(230)
-            }
-            view2.snp.makeConstraints { make in
-                make.height.equalTo(50)
-                make.center.equalTo(imageView)
-                make.width.equalTo(80)
-            }
-            playButton.snp.makeConstraints { make in
-                make.edges.equalToSuperview()
-            }
-            
-            titleLabel.snp.makeConstraints { make in
-                make.height.equalTo(18)
-            }
-            genresLabel.snp.makeConstraints { make in
-                make.height.equalTo(18)
-            }
-            stackView2.snp.makeConstraints { make in
-                make.height.equalTo(18)
-            }
-            dateLabel.snp.makeConstraints { make in
-                make.height.equalTo(18)
-            }
-            runtimeLabel.snp.makeConstraints { make in
-                make.height.equalTo(18)
-            }
-            
-            playButton2.snp.makeConstraints { make in
-                make.width.equalToSuperview()
-                make.height.equalTo(40)
-            }
-            descriptionLabel.snp.makeConstraints { make in
-                make.width.equalToSuperview()
-            }
-            favoriteButton.snp.makeConstraints { make in
-                make.height.equalTo(60)
-                make.width.equalTo(stackView).dividedBy(5.6)
-            }
-            episodeLabel.snp.makeConstraints { make in
-                make.height.equalTo(15)
-            }
-            seasonButton.snp.makeConstraints { make in
-                make.height.equalTo(30)
-                make.width.equalTo(stackView).dividedBy(3.4)
-            }
-            episodeCollectionView.snp.makeConstraints { make in
-                make.width.equalToSuperview()
-                make.height.equalTo(1)
-            }
+    // MARK: - Setup Constraints
+    func setupConstraints(){
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
         }
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+        }
+        stackView.snp.makeConstraints { make in
+            make.top.bottom.equalTo(scrollView.contentLayoutGuide)
+            make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        imageView.snp.makeConstraints { make in
+            make.width.equalToSuperview()
+            make.height.equalTo(230)
+        }
+        titleLabel.snp.makeConstraints { make in
+            make.height.equalTo(18)
+        }
+        genresLabel.snp.makeConstraints { make in
+            make.height.equalTo(18)
+        }
+        stackView2.snp.makeConstraints { make in
+            make.height.equalTo(18)
+        }
+        dateLabel.snp.makeConstraints { make in
+            make.height.equalTo(18)
+        }
+        runtimeLabel.snp.makeConstraints { make in
+            make.height.equalTo(18)
+        }
+        
+        playButton2.snp.makeConstraints { make in
+            make.width.equalToSuperview()
+            make.height.equalTo(40)
+        }
+        descriptionLabel.snp.makeConstraints { make in
+            make.width.equalToSuperview()
+        }
+        favoriteButton.snp.makeConstraints { make in
+            make.height.equalTo(60)
+            make.width.equalTo(stackView).dividedBy(5.6)
+        }
+        episodeLabel.snp.makeConstraints { make in
+            make.height.equalTo(15)
+        }
+        seasonButton.snp.makeConstraints { make in
+            make.height.equalTo(30)
+            make.width.equalTo(stackView).dividedBy(3.4)
+        }
+        episodeCollectionView.snp.makeConstraints { make in
+            make.width.equalToSuperview()
+            make.height.equalTo(1)
+        }
+    }
     //MARK: Actions
     @objc func BackButton(_ sender: UIBarButtonItem) {
         dismiss(animated: true)
     }
-        
-}
     
-    // MARK: - CollectionViewDelegate and DataSource Methods
+}
+
+// MARK: - CollectionViewDelegate and DataSource Methods
 extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
-        func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-            return episode?.count ?? 1
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return episode?.count ?? 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
+        let episod = episode?[indexPath.row]
+        
+        if let url = episod?.stillURL {
+            cell.imageVieww.kf.setImage(with: url)
+            print(url)
         }
         
-        func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
-            let episod = episode?[indexPath.row]
-            
-            if let url = episod?.stillURL {
-                cell.imageVieww.kf.setImage(with: url)
-                print(url)
-            }
-            
-            let name = episod?.name
-            let runtime = episod?.runtime
-            let overview = episod?.overview
-            
-            cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
-            cell.runtimeLabel.text = "\(runtime ?? 0) min."
-            cell.overview.text = "\(overview ?? "")"
-            return cell
-        }
+        let name = episod?.name
+        let runtime = episod?.runtime
+        let overview = episod?.overview
         
-        func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            print(episode?[indexPath.row].name,"bölüm")
-        }
+        cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
+        cell.runtimeLabel.text = "\(runtime ?? 0) min."
+        cell.overview.text = "\(overview ?? "")"
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(episode?[indexPath.row].name,"bölüm")
+    }
 }

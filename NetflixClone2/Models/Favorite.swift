@@ -7,7 +7,8 @@
 
 import Foundation
 
-class Favorite {
+class Favorite: Codable {
+    // MARK: - Properties
     var id: Int? = nil
     var URL: String? = nil
     var name: String? = nil

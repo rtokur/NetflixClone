@@ -80,10 +80,11 @@ class LoginVC: UIViewController {
         button.addTarget(self, action: #selector(SignUpButtonAction), for: .touchUpInside)
         return button
     }()
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .systemBackground
         
         setupViews()
@@ -92,8 +93,9 @@ class LoginVC: UIViewController {
         imageVieww.contentMode = .scaleAspectFit
         navigationItem.titleView = imageVieww
         navigationController?.navigationBar.isTranslucent = true
-        // Do any additional setup after loading the view.
+
     }
+    
     // MARK: - Setup UI
     func setupViews(){
         view.addSubview(stackView)
@@ -131,6 +133,7 @@ class LoginVC: UIViewController {
             make.height.equalTo(50)
         }
     }
+    
     // MARK: - Actions
     @objc func SignInAction(_ sender: UIButton) {
         if emailText.text != "", let email = emailText.text{
@@ -166,7 +169,7 @@ class LoginVC: UIViewController {
                         let navController = UINavigationController(rootViewController: pvc)
                         navController.modalPresentationStyle = .fullScreen
                         navController.isModalInPresentation = true
-
+                        
                         self.present(navController, animated: true)
                     }
                     

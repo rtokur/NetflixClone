@@ -13,7 +13,7 @@ protocol CarouselViewDelegate : AnyObject {
     func didSelectMovie(_ upcoming: Movie)
 }
 
-class CarouselView: UIView, UICollectionViewDelegate {
+class CarouselView: UIView, UICollectionViewDelegate{
     
     // MARK: - Properties
     weak var delegate: CarouselViewDelegate?
@@ -57,6 +57,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
     override func layoutSubviews() {
         setupViews()
     }
+    
     // MARK: - Setup Methods
     private func setupViews() {
         addSubview(upComingMovieCollectionView)
@@ -72,11 +73,13 @@ class CarouselView: UIView, UICollectionViewDelegate {
             make.centerX.equalToSuperview()
         }
     }
+    
     // MARK: - Scroll View Delegate
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let pageIndex = Int(scrollView.contentOffset.x / scrollView.frame.width)
         pageControl.currentPage = pageIndex
     }
+    
     // MARK: - Reload Data
     func reloadData(){
         DispatchQueue.main.async { [weak self] in
@@ -84,7 +87,7 @@ class CarouselView: UIView, UICollectionViewDelegate {
             self.upComingMovieCollectionView.reloadData()
         }
     }
-
+    
 }
 
 // MARK: - UICollectionViewDataSource
@@ -99,7 +102,6 @@ extension CarouselView: UICollectionViewDataSource {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "UpComingMovieCollectionViewCell", for: indexPath) as! UpComingMovieCollectionViewCell
         
         let url = upcomingData[indexPath.row].posterURL
-        print(url)
         cell.movie = upcomingData[indexPath.row]
         var genreName: [String] = []
         if let data = upcomingData[indexPath.row].genreIds {
@@ -123,6 +125,7 @@ extension CarouselView: UICollectionViewDataSource {
         delegate?.didSelectMovie(upcomingMovie)
     }
 }
+
 // MARK: - Update Method
 extension CarouselView {
     public func configureView(with data: [Movie], data2: [Genre]) {

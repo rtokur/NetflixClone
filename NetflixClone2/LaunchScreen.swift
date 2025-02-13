@@ -11,14 +11,15 @@ import FirebaseAuth
 import FirebaseFirestore
 import SnapKit
 import Kingfisher
+
 class LaunchScreen : UIViewController {
     // MARK: - Properties
     let db = Firestore.firestore()
+    var image : String = ""
     
     // MARK: - UI Elements
     let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "netflixx")
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
@@ -38,7 +39,15 @@ class LaunchScreen : UIViewController {
             Task{
                 let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
                 let count = profile.documents.count
-                guard count != 0 else { return }
+                guard count != 0 else {
+                    let pvc = ProfileVC()
+                    pvc.userId = userId
+                    let nvc = UINavigationController(rootViewController: pvc)
+                    nvc.modalPresentationStyle = .fullScreen
+                    nvc.isModalInPresentation = true
+                    present(nvc, animated: true)
+                    return
+                }
                 
                 if let profileImage = profile.documents[0].data()["profileImageURL"] as? String, let profileNamee = profile.documents[0].data()["profileName"] as? String, let documentId = profile.documents[0].documentID as? String {
                     let mvc = MainTabBarViewController()
@@ -65,13 +74,20 @@ class LaunchScreen : UIViewController {
     // MARK: - Setup Methods
     func setupViews(){
         view.backgroundColor = .systemBackground
-
         view.addSubview(imageView)
     }
     
     func setupConstraints(){
         imageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
+        }
+        if image == "" {
+            imageView.image = UIImage(named: "netflixx")
+        } else {
+            imageView.kf.setImage(with: URL(string: image))
+            imageView.snp.updateConstraints { make in
+                make.edges.equalToSuperview().inset(100)
+            }
         }
     }
 }

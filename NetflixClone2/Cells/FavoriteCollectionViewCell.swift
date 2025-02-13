@@ -7,13 +7,16 @@
 
 import UIKit
 import SnapKit
+import FirebaseFirestore
+
+protocol UpdateCollectionView: AnyObject {
+    func update()
+}
 class FavoriteCollectionViewCell: UICollectionViewCell {
     // MARK: - UI Elements
-    
     let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 13)
-        label.numberOfLines = 0
         label.textAlignment = .left
         label.textColor = .label
         return label
@@ -34,8 +37,6 @@ class FavoriteCollectionViewCell: UICollectionViewCell {
         return imageView
     }()
     
-    var moviename : String = ""
-    
     var playButton: UIButton = {
         let button = UIButton()
         button.addTarget(self, action: #selector(playButtonAction), for: .touchUpInside)
@@ -44,6 +45,14 @@ class FavoriteCollectionViewCell: UICollectionViewCell {
         button.imageEdgeInsets = UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15)
         return button
     }()
+    
+    // MARK: - Properties
+    var delegate: UpdateCollectionView?
+    var count: Int = 0
+    let db = Firestore.firestore()
+    var userId: String = ""
+    var documentId: String = ""
+    var movieId: Int = 0
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -52,9 +61,24 @@ class FavoriteCollectionViewCell: UICollectionViewCell {
         
     }
     // MARK: - Button Action
-    @objc func playButtonAction() {
-
+    @objc func playButtonAction(_ sender: UIButton) {
+        if playButton.tintColor == .label {
+            print("play")
+        } else if playButton.tintColor == .red {
+            if userId != "" {
+                if documentId != "" {
+                    if movieId != 0 {
+                        print("movie siliniyor")
+                        Task {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                            delegate?.update()
+                        }
+                    }
+                }
+            }
+        }
     }
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }

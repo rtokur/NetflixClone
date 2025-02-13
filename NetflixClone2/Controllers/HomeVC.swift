@@ -7,8 +7,8 @@
 import UIKit
 import SnapKit
 import Kingfisher
-class HomeVC: UIViewController, CarouselViewDelegate {
-    
+
+class HomeVC: UIViewController, CarouselViewDelegate{
     // MARK: - Protocol from CarouselView
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
@@ -33,6 +33,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
     var documentId: String = ""
     var profileName: String = ""
     
+    //MARK: UI Elements
     private let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
@@ -122,13 +123,15 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         return label
     }()
     
-
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        nameLabel.text = "For \(profileName)"
-        navigationItem.titleView = nameLabel
+        if userId != "" {
+            let label = UIBarButtonItem(title: "For \(profileName)", style: .done, target: nil, action: nil)
+            label.tintColor = .label
+            navigationItem.leftBarButtonItem = label
+        }
         let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
         searchButton.tintColor = .label
         navigationItem.rightBarButtonItems = [searchButton]
@@ -151,6 +154,7 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         topRatedCollectionView.register(TopRatedMovieCollectionViewCell.self, forCellWithReuseIdentifier: "TopRatedMovieCollectionViewCell")
         popularSerieCollectionView.register(PopularSerieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularSerieCollectionViewCell")
     }
+    
     //MARK: -Make call for movies and series from API
     private func getData() {
         Task {
@@ -166,13 +170,13 @@ class HomeVC: UIViewController, CarouselViewDelegate {
             activityIndicator.stopAnimating()
         }
     }
+    
     // MARK: - Setup Views
     private func setupViews()  {
-        
         view.backgroundColor = .systemBackground
-
+        
         view.addSubview(scrollView)
-
+        
         scrollView.addSubview(stackView)
         
         upComingView.delegate = self
@@ -239,12 +243,13 @@ class HomeVC: UIViewController, CarouselViewDelegate {
         }
         
     }
-
-//    MARK: Actions
+    
+    //    MARK: Actions
     @objc func searchButton(_ sender: UIBarButtonItem) {
         let svc = SearchVC()
         svc.modalPresentationStyle = .fullScreen
         svc.isModalInPresentation = true
+        svc.count = 1
         present(svc, animated: true)
     }
 }
@@ -283,17 +288,14 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PopularMovieCollectionViewCell", for: indexPath) as! PopularMovieCollectionViewCell
         let movie = popularMovies[indexPath.row]
-            
+        
         if let url = movie.posterURL {
             cell.posterImageVieww.kf.setImage(with: url)
         }
         return cell
-        
     }
     
-    
     // MARK: - DetailVC passes
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // handle tap events
         let dVC = DetailVC()

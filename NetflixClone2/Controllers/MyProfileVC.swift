@@ -9,8 +9,10 @@ import UIKit
 import Kingfisher
 import SnapKit
 import FirebaseFirestore
+
 class MyProfileVC: UIViewController {
     
+    //MARK: Properties
     let db = Firestore.firestore()
     var profileImage : String = ""
     var profileName: String = ""
@@ -19,13 +21,6 @@ class MyProfileVC: UIViewController {
     var favorites: [Favorite] = []
     
     // MARK: - UI Elements
-    let titleLabel : UILabel = {
-        let label = UILabel()
-        label.text = "My Netflix"
-        label.textColor = .label
-        label.font = .boldSystemFont(ofSize: 23)
-        return label
-    }()
     
     let scrollView: UIScrollView = {
         let scrollview = UIScrollView()
@@ -61,7 +56,7 @@ class MyProfileVC: UIViewController {
         let label = UIButton()
         label.titleLabel?.font = .boldSystemFont(ofSize: 25)
         label.setTitleColor(.label, for: .normal)
-        label.setImage(UIImage(systemName: "arrow.turn.left.down"), for: .normal)
+        label.setImage(UIImage(systemName: "chevron.down"), for: .normal)
         label.tintColor = .label
         label.isEnabled = true
         label.addTarget(self, action: #selector(profileAction), for: .touchUpInside)
@@ -86,8 +81,8 @@ class MyProfileVC: UIViewController {
         let button = UIButton()
         button.setTitle("Show All", for: .normal)
         button.setTitleColor(.label, for: .normal)
-        button.addTarget(self, action: #selector(profileAction), for: .touchUpInside)
-        button.setImage(UIImage(systemName: "arrow.turn.up.right"), for: .normal)
+        button.addTarget(self, action: #selector(FavoriteAction), for: .touchUpInside)
+        button.setImage(UIImage(systemName: "chevron.forward"), for: .normal)
         button.tintColor = .label
         button.titleLabel?.font = .systemFont(ofSize: 14)
         return button
@@ -111,14 +106,16 @@ class MyProfileVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         view.backgroundColor = .systemBackground
-        navigationItem.titleView = titleLabel
         let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
         searchButton.tintColor = .label
         let moreButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .done, target: self, action: #selector(moreButton))
         moreButton.tintColor = .label
         navigationItem.rightBarButtonItems = [moreButton,searchButton]
+        let label = UIBarButtonItem(title: "My Netflix", style: .done, target: nil, action: nil)
+        label.tintColor = .label
+        navigationItem.leftBarButtonItem = label
         navigationController?.navigationBar.isTranslucent = true
         activityIndicator.startAnimating()
         setupViews()
@@ -126,10 +123,9 @@ class MyProfileVC: UIViewController {
         getFavorites()
         // Do any additional setup after loading the view.
     }
-
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        getFavorites()
     }
     
     // MARK: - Setup Methods
@@ -210,11 +206,10 @@ class MyProfileVC: UIViewController {
             let count = favorite.documents.count
             guard count != 0 else { return }
             for favorite in favorite.documents {
-                let id = favorite.data()["movieId"] as! Int
-                let URL = favorite.data()["movieImageURL"] as! String
-                let name = favorite.data()["movieName"] as! String
-                let fav = Favorite(id: id, URL: URL, name: name)
-                favorites.append(fav)
+                if let id = favorite.data()["movieId"] as? Int, let URL = favorite.data()["movieImageURL"] as? String, let name = favorite.data()["movieName"] as? String {
+                    let fav = Favorite(id: id, URL: URL, name: name)
+                    favorites.append(fav)
+                }
             }
             listCollectionView.reloadData()
             activityIndicator.stopAnimating()
@@ -223,20 +218,45 @@ class MyProfileVC: UIViewController {
     
     // MARK: - Actions
     @objc func moreButton(_ sender: UIBarButtonItem) {
-        print("ok")
+        let mvc = MoreVC()
+        mvc.userId = userId
+        mvc.documentId = documentId
+        mvc.modalPresentationStyle = .formSheet
+        mvc.sheetPresentationController?.detents = [.custom(resolver: { context in
+            106
+        })]
+        present(mvc, animated: true)
+    }
+    
+    @objc func FavoriteAction(_ sender: UIButton) {
+        let fvc = FavoriteVC()
+        fvc.userId = userId
+        fvc.documentId = documentId
+        let nvc = UINavigationController(rootViewController: fvc)
+        nvc.isModalInPresentation = true
+        nvc.modalPresentationStyle = .fullScreen
+        present(nvc, animated: true)
     }
     
     @objc func ProfileAction(_ sender: UITapGestureRecognizer) {
         let pmvc = ProfileManagementVC()
-        pmvc.modalPresentationStyle = .automatic
-        pmvc.sheetPresentationController?.detents = [.medium()]
+        pmvc.userId = userId
+        pmvc.documentId = documentId
+        pmvc.modalPresentationStyle = .formSheet
+        pmvc.sheetPresentationController?.detents = [.custom(resolver: { context in
+            184
+        })]
         present(pmvc, animated: true)
     }
     
     @objc func profileAction(_ sender: UIButton) {
         let pmvc = ProfileManagementVC()
-        pmvc.modalPresentationStyle = .automatic
-        pmvc.sheetPresentationController?.detents = [.medium()]
+        pmvc.userId = userId
+        pmvc.documentId = documentId
+        pmvc.modalPresentationStyle = .formSheet
+        pmvc.sheetPresentationController?.detents = [.custom(resolver: { context in
+            184
+        })]
         present(pmvc, animated: true)
     }
     
@@ -244,6 +264,7 @@ class MyProfileVC: UIViewController {
         let svc = SearchVC()
         svc.modalPresentationStyle = .fullScreen
         svc.isModalInPresentation = true
+        svc.count = 1
         present(svc, animated: true)
     }
 }
@@ -256,17 +277,19 @@ extension MyProfileVC: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ListCollectionViewCell", for: indexPath) as! ListCollectionViewCell
-        cell.favorite = favorites[indexPath.row]
-        if let url = favorites[indexPath.row].URL{
+        let fav = favorites[indexPath.row]
+        if let url = fav.URL{
             cell.imageView.kf.setImage(with: URL(string: url))
         }
         return cell
     }
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let fvc = FavoriteVC()
-        fvc.modalPresentationStyle = .fullScreen
-        fvc.isModalInPresentation = true
+        fvc.userId = userId
+        fvc.documentId = documentId
         let nvc = UINavigationController(rootViewController: fvc)
+        nvc.isModalInPresentation = true
+        nvc.modalPresentationStyle = .fullScreen
         present(nvc, animated: true)
     }
     

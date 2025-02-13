@@ -8,14 +8,15 @@
 import UIKit
 import SnapKit
 import Kingfisher
-import FirebaseAuth
 import FirebaseFirestore
+
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     var movie: Movie?
     var userId: String = ""
     var documentId: String = ""
     let db = Firestore.firestore()
+    
     // MARK: - UI Elements
     let view : UIView = {
         let view = UIView()
@@ -30,7 +31,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         gradiantLayer.locations = [0.0, 0.3]
         gradiantLayer.startPoint = CGPoint(x: 0.5, y: 0.0)
         gradiantLayer.endPoint = CGPoint(x: 0.5, y: 1.0)
-        
         return gradiantLayer
     }()
     
@@ -94,6 +94,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         stackview.spacing = 5
         return stackview
     }()
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -127,70 +128,41 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         // MARK: - Play Button
         stackView3.addArrangedSubview(playButton)
         
-        if userId != "" {
-            print(userId)
-            if documentId != "" {
-                print(documentId)
-                if let movieId = movie?.id {
-                    Task{
-                        let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
-                        
-                        let isExisted = movie.exists
-                        
-                        if isExisted {
-                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                        } else{
-                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-                        }
-                    }
-                }
-            }
-        } else {
-            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-        }
+        
         stackView3.addArrangedSubview(favoriteButton)
     }
     
-
+    
     // MARK: - Favorite Button Action method
     @objc func favoriteButtonAction(_ sender: UIButton!) {
-        if favoriteButton.currentImage == UIImage(systemName: "plus") {
-            Task{
-                if let userId = Auth.auth().currentUser?.uid {
-                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
-                    
-                    let count = profile.documents.count
-                    
-                    guard count != 0 else { return}
-                    
-                    if let documentId = profile.documents[0].documentID as? String {
-                        if let movieId = movie?.id, let movieImage = movie?.posterURL {
-                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movie?.id,"movieName":movie?.title,"movieImageURL":"\(movieImage)"])
-                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+        if userId != "" {
+            if favoriteButton.currentImage == UIImage(systemName: "plus") {
+                Task{
+                    if userId != "" {
+                        if documentId != "" {
+                            if let movieId = movie?.id, let movieImage = movie?.posterURL {
+                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movie?.id,"movieName":movie?.title,"movieImageURL":"\(movieImage)"])
+                                favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                            }
+                            
+                        }
+                    }
+                }
+            } else if favoriteButton.currentImage == UIImage(systemName: "checkmark"){
+                Task{
+                    if userId != "" {
+                        if documentId != "" {
+                            if let movieId = movie?.id {
+                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                                favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                            }
                         }
                         
                     }
                 }
+                
             }
-        } else if favoriteButton.currentImage == UIImage(systemName: "checkmark"){
-            Task{
-                if let userId = Auth.auth().currentUser?.uid {
-                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
-                    
-                    let count = profile.documents.count
-                    
-                    guard count != 0 else { return}
-                    
-                    if let documentId = profile.documents[0].documentID as? String {
-                        if let movieId = movie?.id {
-                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
-                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-                        }
-                        
-                    }
-                    
-                }
-            }
+        } else {
             
         }
     }
@@ -232,6 +204,25 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     func configure(url: URL?) {
         imageView.kf.setImage(with: url)
         // MARK: - Favorite Button
+        if userId != "" {
+            if documentId != "" {
+                if let movieId = movie?.id {
+                    Task{
+                        let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
+                        
+                        let isExisted = movie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    }
+                }
+            }
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
     }
 }
 

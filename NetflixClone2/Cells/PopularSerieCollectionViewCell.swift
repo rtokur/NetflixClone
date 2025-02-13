@@ -9,7 +9,7 @@ import UIKit
 
 import SnapKit
 class PopularSerieCollectionViewCell: UICollectionViewCell {
-    // MARK: - Properties
+    // MARK: - UI Elements
     let posterImageVieww : UIImageView = {
         let posterImageVieww = UIImageView()
         posterImageVieww.contentMode = .scaleAspectFill

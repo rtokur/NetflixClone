@@ -9,7 +9,6 @@ import UIKit
 import SnapKit
 import FirebaseFirestore
 import FirebaseStorage
-import FirebaseAuth
 import Kingfisher
 // MARK: - ReloadData Protocol
 protocol ReloadData: AnyObject {
@@ -22,11 +21,21 @@ class EditProfileVC: UIViewController,ReLoadImage {
         imageView.image = image
         checkForChanges()
     }
+    
     // MARK: - Properties
     var delegate: ReloadData?
     var count: Int = 0
     let db = Firestore.firestore()
     let storage = Storage.storage()
+    var userId : String = ""
+    var documentId: String = ""
+    var profileName: String = ""
+    var profileImageURL : String = ""
+    var firstImage: UIImage?
+    var senderButton : Int = 0
+    var isChanged: Bool = false
+    var iconList: [UIImage] = [UIImage(named: "profile-icon-1")!, UIImage(named: "profile-icon-2")!, UIImage(named: "profile-icon-3")!, UIImage(named: "profile-icon-4")!, UIImage(named: "profile-icon-5")!, UIImage(named: "profile-icon-6")!, UIImage(named: "profile-icon-7")!, UIImage(named: "profile-icon-8")!, UIImage(named: "profile-icon-9")!, UIImage(named: "profile-icon-10")!, UIImage(named: "profile-icon-11")!]
+    
     // MARK: - UI Elements
     let stackView: UIStackView = {
         let stackview = UIStackView()
@@ -107,12 +116,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
         text.addTarget(self, action: #selector(textFieldDidBeginEditing), for: .editingChanged)
         return text
     }()
-    var profileName: String?
-    var profileImageURL : String?
-    var firstImage: UIImage?
-    var senderButton : Int = 0
-    var isChanged: Bool = false
-    var iconList: [UIImage] = [UIImage(named: "profile-icon-1")!, UIImage(named: "profile-icon-2")!, UIImage(named: "profile-icon-3")!, UIImage(named: "profile-icon-4")!, UIImage(named: "profile-icon-5")!, UIImage(named: "profile-icon-6")!, UIImage(named: "profile-icon-7")!, UIImage(named: "profile-icon-8")!, UIImage(named: "profile-icon-9")!, UIImage(named: "profile-icon-10")!, UIImage(named: "profile-icon-11")!]
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -122,6 +126,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
         checkForChanges()
     }
     
+    // MARK: - Save Button enabled setting
     func checkForChanges(){
         if firstImage == imageView.image {
             saveButton.isEnabled = false
@@ -133,6 +138,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
             isChanged = true
         }
     }
+    
     // MARK: - Setup UI
     func setupViews(){
         view.addSubview(stackView)
@@ -144,8 +150,8 @@ class EditProfileVC: UIViewController,ReLoadImage {
         stackView2.addArrangedSubview(profileLabel)
         
         stackView2.addArrangedSubview(saveButton)
-        if let url = profileImageURL {
-            imageView.kf.setImage(with: URL(string: url))
+        if profileImageURL != "" {
+            imageView.kf.setImage(with: URL(string: profileImageURL))
             firstImage = imageView.image
         }else{
             imageView.image = iconList.randomElement()
@@ -154,8 +160,8 @@ class EditProfileVC: UIViewController,ReLoadImage {
         
         view.addSubview(editButton)
         
-        if let name = profileName {
-            nameText.text = name
+        if profileName != "" {
+            nameText.text = profileName
         }
         stackView.addArrangedSubview(nameText)
     }
@@ -196,8 +202,8 @@ class EditProfileVC: UIViewController,ReLoadImage {
     }
     // MARK: - Actions
     @objc func textFieldDidBeginEditing(_ textField: UITextField) {
-        if let name = profileName {
-            if textField.text == name {
+        if profileName != "" {
+            if textField.text == profileName {
                 saveButton.isEnabled = false
                 saveButton.setTitleColor(.lightGray, for: .normal)
             } else{
@@ -219,8 +225,8 @@ class EditProfileVC: UIViewController,ReLoadImage {
     @objc func saveButtonAction(){
         let profileNamee = nameText.text
         let profileImage = imageView.image
-        if let userId = Auth.auth().currentUser?.uid {
-            if let name = profileName {
+        if userId != "" {
+            if profileName != "" {
                 if isChanged {
                     Task{
                         var downloadURL = ""

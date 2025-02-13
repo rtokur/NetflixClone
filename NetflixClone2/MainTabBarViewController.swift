@@ -7,6 +7,7 @@
 
 import UIKit
 import AVFoundation
+
 class MainTabBarViewController: UITabBarController{
     
     // MARK: - Properties
@@ -14,19 +15,24 @@ class MainTabBarViewController: UITabBarController{
     var profileImageURL: String = ""
     var userId: String = ""
     var documentId: String = ""
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
         setupViews()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        viewDidLoad()
+    }
+    
     // MARK: - Setup Methods
     func setupViews(){
         //MARK: -Main Controllers
         var vc1 = UINavigationController(rootViewController: HomeVC())
-        var vc2 = UINavigationController(rootViewController: SearchVC())
+        let vc2 = SearchVC()
         var vc3 = UINavigationController(rootViewController: LoginVC())
-
+        
         //MARK: -TabBar Symbols
         vc1.tabBarItem.image = UIImage(systemName: "house")
         vc2.tabBarItem.image = UIImage(systemName: "magnifyingglass")
@@ -63,9 +69,7 @@ class MainTabBarViewController: UITabBarController{
         setViewControllers([vc1,vc2,vc3], animated: true)
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        viewDidLoad()
-    }
+    
 }
 
 public extension UIImage {
