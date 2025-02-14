@@ -39,6 +39,8 @@ class MoreVC: UIViewController {
         button.tintColor = .label
         button.setTitleColor(.label, for: .normal)
         button.addTarget(self, action: #selector(profileButton(_:)), for: .touchUpInside)
+        button.titleEdgeInsets.left = -150
+        button.imageEdgeInsets.left = -160
         return button
     }()
     
@@ -58,6 +60,8 @@ class MoreVC: UIViewController {
         button.tintColor = .label
         button.setTitleColor(.label, for: .normal)
         button.addTarget(self, action: #selector(signOutButton(_:)), for: .touchUpInside)
+        button.titleEdgeInsets.left = -270
+        button.imageEdgeInsets.left = -280
         return button
     }()
     
@@ -126,6 +130,7 @@ class MoreVC: UIViewController {
         let action1 = UIAlertAction(title: "Cancel", style: .cancel)
         let action2 = UIAlertAction(title: "Sign Out", style: .default) { action2 in
             Task{
+                try await self.db.collection("Users").document(self.userId).collection("Profiles").document(self.documentId).updateData(["isEnabled": false])
                 try await Auth.auth().signOut()
                 let lvc = LaunchScreen()
                 lvc.isModalInPresentation = true

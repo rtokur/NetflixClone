@@ -8,14 +8,21 @@
 import UIKit
 import SnapKit
 
-// MARK: - Protocol
+// MARK: - Protocols
 protocol CarouselViewDelegate : AnyObject {
     func didSelectMovie(_ upcoming: Movie)
 }
+protocol MakeAlert2: AnyObject {
+    func makeAlert2()
+}
 
-class CarouselView: UIView, UICollectionViewDelegate{
+class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
+    func makeAlert() {
+        delegate2?.makeAlert2()
+    }
     
     // MARK: - Properties
+    weak var delegate2: MakeAlert2?
     weak var delegate: CarouselViewDelegate?
     private var upcomingData : [Movie] = []
     private var currentPage = 0
@@ -117,6 +124,7 @@ extension CarouselView: UICollectionViewDataSource {
         cell.documentId = documentId
         cell.genreLabel.text = genreName.joined(separator: " • ")
         cell.configure(url: url)
+        cell.delegate = self
         return cell
     }
     

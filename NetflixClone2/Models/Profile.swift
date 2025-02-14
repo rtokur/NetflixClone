@@ -12,10 +12,12 @@ class Profile: Codable {
     let isEnabled: Bool?
     let profileImageURL: String?
     let profileName: String?
+    let documentId: String?
     
-    init(isEnabled: Bool?, profileImageURL: String?, profileName: String?) {
+    init(isEnabled: Bool?, profileImageURL: String?, profileName: String?, documentId: String?) {
         self.isEnabled = isEnabled
         self.profileImageURL = profileImageURL
         self.profileName = profileName
+        self.documentId = documentId
     }
 }

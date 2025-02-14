@@ -24,6 +24,12 @@ class LaunchScreen : UIViewController {
         return imageView
     }()
     
+    let activityIndicator: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView(style: .medium)
+        activity.hidesWhenStopped = true
+        activity.isHidden = true
+        return activity
+    }()
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,6 +81,7 @@ class LaunchScreen : UIViewController {
     func setupViews(){
         view.backgroundColor = .systemBackground
         view.addSubview(imageView)
+        view.addSubview(activityIndicator)
     }
     
     func setupConstraints(){
@@ -87,6 +94,10 @@ class LaunchScreen : UIViewController {
             imageView.kf.setImage(with: URL(string: image))
             imageView.snp.updateConstraints { make in
                 make.edges.equalToSuperview().inset(100)
+            }
+            activityIndicator.isHidden = false
+            activityIndicator.snp.makeConstraints { make in
+                make.top.equalTo(imageView.snp.bottom)
             }
         }
     }

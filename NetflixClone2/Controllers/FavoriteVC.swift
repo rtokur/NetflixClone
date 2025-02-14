@@ -52,7 +52,7 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
     
     let navLabel: UILabel = {
         let label = UILabel()
-        label.text = "Favorites"
+        label.text = "My List"
         label.font = .boldSystemFont(ofSize: 17)
         label.textColor = .label
         return label

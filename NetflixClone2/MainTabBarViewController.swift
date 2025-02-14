@@ -7,7 +7,7 @@
 
 import UIKit
 import AVFoundation
-
+import SnapKit
 class MainTabBarViewController: UITabBarController{
     
     // MARK: - Properties
@@ -15,6 +15,12 @@ class MainTabBarViewController: UITabBarController{
     var profileImageURL: String = ""
     var userId: String = ""
     var documentId: String = ""
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView(style: .large)
+        activity.hidesWhenStopped = true
+        return activity
+    }()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -28,48 +34,52 @@ class MainTabBarViewController: UITabBarController{
     
     // MARK: - Setup Methods
     func setupViews(){
-        //MARK: -Main Controllers
-        var vc1 = UINavigationController(rootViewController: HomeVC())
-        let vc2 = SearchVC()
-        var vc3 = UINavigationController(rootViewController: LoginVC())
-        
-        //MARK: -TabBar Symbols
-        vc1.tabBarItem.image = UIImage(systemName: "house")
-        vc2.tabBarItem.image = UIImage(systemName: "magnifyingglass")
-        vc3.tabBarItem.image = UIImage(systemName: "person")
-        
-        //MARK: -TabBar Titles
-        vc1.title = "Home"
-        vc2.title = "Search"
-        vc3.title = "Login"
-        
-        tabBar.tintColor = .label
-        
-        if userId != "" {
-            let hvc = HomeVC()
-            hvc.userId = userId
-            hvc.documentId = documentId
-            hvc.profileName = profileName
-            vc1 = UINavigationController(rootViewController: hvc)
-            vc1.title = "Home"
-            vc1.tabBarItem.image = UIImage(systemName: "house")
-            let mpvc3 = MyProfileVC()
-            let data = try? Data(contentsOf: URL(string: profileImageURL)!)
-            guard let data else { return }
-            let image = UIImage(data: data)
-            let resized = image?.resize(25, 25)
-            mpvc3.profileImage = profileImageURL
-            mpvc3.profileName = profileName
-            mpvc3.userId = userId
-            mpvc3.documentId = documentId
-            vc3 = UINavigationController(rootViewController: mpvc3)
-            vc3.tabBarItem.image = resized
-            vc3.title = profileName
+        view.addSubview(activityIndicator)
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
-        setViewControllers([vc1,vc2,vc3], animated: true)
+        activityIndicator.startAnimating()
+            //MARK: -Main Controllers
+            var vc1 = UINavigationController(rootViewController: HomeVC())
+            let vc2 = SearchVC()
+            var vc3 = UINavigationController(rootViewController: LoginVC())
+            
+            //MARK: -TabBar Symbols
+            vc1.tabBarItem.image = UIImage(systemName: "house")
+            vc2.tabBarItem.image = UIImage(systemName: "magnifyingglass")
+            vc3.tabBarItem.image = UIImage(systemName: "person")
+            
+            //MARK: -TabBar Titles
+            vc1.title = "Home"
+            vc2.title = "Search"
+            vc3.title = "Login"
+            
+            tabBar.tintColor = .label
+            
+            if userId != "" {
+                let hvc = HomeVC()
+                hvc.userId = userId
+                hvc.documentId = documentId
+                hvc.profileName = profileName
+                vc1 = UINavigationController(rootViewController: hvc)
+                vc1.title = "Home"
+                vc1.tabBarItem.image = UIImage(systemName: "house")
+                let mpvc3 = MyProfileVC()
+                let data = try! Data(contentsOf: URL(string: profileImageURL)!)
+                let image = UIImage(data: data)
+                let resized = image?.resize(25, 25).withRenderingMode(.alwaysOriginal)
+                mpvc3.profileImage = profileImageURL
+                mpvc3.profileName = profileName
+                mpvc3.userId = userId
+                mpvc3.documentId = documentId
+                vc3 = UINavigationController(rootViewController: mpvc3)
+                vc3.tabBarItem.image = resized
+                vc3.title = profileName
+            }
+            setViewControllers([vc1,vc2,vc3], animated: true)
+            activityIndicator.stopAnimating()
+        
     }
-    
-    
 }
 
 public extension UIImage {

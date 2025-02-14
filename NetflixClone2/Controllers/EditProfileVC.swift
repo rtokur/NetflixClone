@@ -24,7 +24,6 @@ class EditProfileVC: UIViewController,ReLoadImage {
     
     // MARK: - Properties
     var delegate: ReloadData?
-    var count: Int = 0
     let db = Firestore.firestore()
     let storage = Storage.storage()
     var userId : String = ""
@@ -32,8 +31,6 @@ class EditProfileVC: UIViewController,ReLoadImage {
     var profileName: String = ""
     var profileImageURL : String = ""
     var firstImage: UIImage?
-    var senderButton : Int = 0
-    var isChanged: Bool = false
     var iconList: [UIImage] = [UIImage(named: "profile-icon-1")!, UIImage(named: "profile-icon-2")!, UIImage(named: "profile-icon-3")!, UIImage(named: "profile-icon-4")!, UIImage(named: "profile-icon-5")!, UIImage(named: "profile-icon-6")!, UIImage(named: "profile-icon-7")!, UIImage(named: "profile-icon-8")!, UIImage(named: "profile-icon-9")!, UIImage(named: "profile-icon-10")!, UIImage(named: "profile-icon-11")!]
     
     // MARK: - UI Elements
@@ -117,6 +114,16 @@ class EditProfileVC: UIViewController,ReLoadImage {
         return text
     }()
     
+    let deleteButton : UIButton = {
+        let button = UIButton()
+        button.setTitle("Delete Profile", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.setImage(UIImage(systemName: "trash"), for: .normal)
+        button.tintColor = .white
+        button.addTarget(self, action: #selector(deleteButton(_:)), for: .touchUpInside)
+        return button
+    }()
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -131,11 +138,9 @@ class EditProfileVC: UIViewController,ReLoadImage {
         if firstImage == imageView.image {
             saveButton.isEnabled = false
             saveButton.setTitleColor(.lightGray, for: .normal)
-            isChanged = false
         } else{
             saveButton.isEnabled = true
             saveButton.setTitleColor(.label, for: .normal)
-            isChanged = true
         }
     }
     
@@ -164,11 +169,13 @@ class EditProfileVC: UIViewController,ReLoadImage {
             nameText.text = profileName
         }
         stackView.addArrangedSubview(nameText)
+        
+        stackView.addArrangedSubview(deleteButton)
     }
     
     func setupConstraints(){
         stackView.snp.makeConstraints { make in
-            make.height.equalTo(218)
+            make.height.equalTo(278)
             make.width.equalToSuperview()
             make.centerX.equalTo(view.safeAreaLayoutGuide)
         }
@@ -199,6 +206,10 @@ class EditProfileVC: UIViewController,ReLoadImage {
             make.width.equalToSuperview().inset(50)
             make.height.equalTo(50)
         }
+        deleteButton.snp.makeConstraints { make in
+            make.height.equalTo(40)
+            make.width.equalTo(nameText).dividedBy(2)
+        }
     }
     // MARK: - Actions
     @objc func textFieldDidBeginEditing(_ textField: UITextField) {
@@ -223,46 +234,38 @@ class EditProfileVC: UIViewController,ReLoadImage {
     }
     
     @objc func saveButtonAction(){
-        let profileNamee = nameText.text
-        let profileImage = imageView.image
-        if userId != "" {
-            if profileName != "" {
-                if isChanged {
-                    Task{
-                        var downloadURL = ""
-                        let ref = storage.reference().child("Profiles/\(userId)/profile\(count).jpg")
-                        var data = Data()
-                        data = profileImage!.jpegData(compressionQuality: 0.1)!
-                        try await ref.delete()
-                        try await ref.putDataAsync(data,metadata: nil)
-                        downloadURL = try await ref.downloadURL().absoluteString
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(senderButton)").updateData(["profileImageURL": downloadURL])
-                        delegate?.didUpdateProfile()
-                        dismiss(animated: true)
-                    }
-                } else{
-                    Task{
-                        try await db.collection("Users").document(userId).collection("Profiles").document("profile\(senderButton)").updateData(["profileName":profileNamee])
-                        delegate?.didUpdateProfile()
-                        dismiss(animated: true)
-                    }
-                }
-            } else{
-                Task {
-                    var downloadURL = ""
-                    let ref = storage.reference().child("Profiles/\(userId)/profile\(count+1).jpg")
-                    var data = Data()
-                    data = profileImage!.jpegData(compressionQuality: 0.1)!
-                    try await ref.putData(data, metadata: nil)
+        guard let profileNamee = nameText.text else { return }
+        guard let profileImage = imageView.image, let data = profileImage.jpegData(compressionQuality: 0.1) else { return }
+        Task {
+                var downloadURL = ""
+                let imageName = documentId.isEmpty ? UUID().uuidString : documentId
+                let ref = storage.reference().child("Profiles/\(userId)/\(imageName).jpg")
+
+                do {
+                    try await ref.putDataAsync(data, metadata: nil)
                     downloadURL = try await ref.downloadURL().absoluteString
                     
-                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(count+1)").setData(["profileName":profileNamee,"profileImageURL":downloadURL, "isEnabled": false])
-                    
+                    let profileRef = db.collection("Users").document(userId).collection("Profiles").document(imageName)
+
+                    if documentId.isEmpty {
+                        try await profileRef.setData([
+                            "profileName": profileNamee,
+                            "profileImageURL": downloadURL,
+                            "isEnabled": false
+                        ])
+                    } else {
+                        try await profileRef.updateData([
+                            "profileName": profileNamee,
+                            "profileImageURL": downloadURL
+                        ])
+                    }
+
                     delegate?.didUpdateProfile()
                     dismiss(animated: true)
+                } catch {
+                    print(error.localizedDescription)
                 }
             }
-        }
     }
     
     @objc func cancelButtonAction(){
@@ -274,6 +277,21 @@ class EditProfileVC: UIViewController,ReLoadImage {
         ivc.delegate = self
         let nc = UINavigationController(rootViewController: ivc)
         present(nc, animated: true)
+    }
+    
+    @objc func deleteButton(_ sender: UIButton){
+        let alert = UIAlertController(title: "Should the profile named \(profileName) be deleted?", message: "All recommendations, watch history, My List, settings and much more will be permanently deleted.", preferredStyle: .alert)
+        let action1 = UIAlertAction(title: "Cancel", style: .cancel)
+        let action2 = UIAlertAction(title: "Delete", style: .default) { [self] action in
+            Task{
+                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).delete()
+                delegate?.didUpdateProfile()
+                dismiss(animated: true)
+            }
+        }
+        alert.addAction(action1)
+        alert.addAction(action2)
+        present(alert, animated: true)
     }
 }
 

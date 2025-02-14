@@ -9,9 +9,12 @@ import UIKit
 import SnapKit
 import Kingfisher
 import FirebaseFirestore
-
+protocol MakeAlert: AnyObject {
+    func makeAlert()
+}
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
+    weak var delegate: MakeAlert?
     var movie: Movie?
     var userId: String = ""
     var documentId: String = ""
@@ -60,7 +63,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     let favoriteButton : UIButton = {
         let favoriteButton = UIButton()
         favoriteButton.backgroundColor = .darkGray
-        favoriteButton.setTitle("Favorites", for: UIControl.State.normal)
+        favoriteButton.setTitle("My List", for: UIControl.State.normal)
         favoriteButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         favoriteButton.tintColor = .white
         favoriteButton.layer.cornerRadius = 3
@@ -163,7 +166,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
                 
             }
         } else {
-            
+            delegate?.makeAlert()
         }
     }
     // MARK: - Play Button Action method

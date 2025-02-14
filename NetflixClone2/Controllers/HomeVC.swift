@@ -8,7 +8,13 @@ import UIKit
 import SnapKit
 import Kingfisher
 
-class HomeVC: UIViewController, CarouselViewDelegate{
+class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
+    func makeAlert2() {
+        let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+        present(alert, animated: true)
+    }
+    
     // MARK: - Protocol from CarouselView
     func didSelectMovie(_ upcoming: Movie) {
         let dVC = DetailVC()
@@ -182,6 +188,7 @@ class HomeVC: UIViewController, CarouselViewDelegate{
         upComingView.delegate = self
         upComingView.documentId = documentId
         upComingView.userId = userId
+        upComingView.delegate2 = self
         stackView.addArrangedSubview(upComingView)
         
         stackView.addArrangedSubview(popularTitleLabel)

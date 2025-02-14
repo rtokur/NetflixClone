@@ -11,6 +11,9 @@ import SnapKit
 import FirebaseFirestore
 
 class LoginVC: UIViewController {
+    //MARK: Properties
+    var userId: String = ""
+    
     // MARK: - UI Elements
     let stackView: UIStackView = {
         let stackView = UIStackView()
@@ -164,8 +167,8 @@ class LoginVC: UIViewController {
                         }
                     }else {
                         let pvc = ProfileVC()
-                        let user = Auth.auth().currentUser
-                        let email = user?.email
+                        pvc.userId = Auth.auth().currentUser!.uid
+                        
                         let navController = UINavigationController(rootViewController: pvc)
                         navController.modalPresentationStyle = .fullScreen
                         navController.isModalInPresentation = true

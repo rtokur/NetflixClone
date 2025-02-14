@@ -53,14 +53,16 @@ class MyProfileVC: UIViewController {
     }()
     
     let nameButton: UIButton = {
-        let label = UIButton()
-        label.titleLabel?.font = .boldSystemFont(ofSize: 25)
-        label.setTitleColor(.label, for: .normal)
-        label.setImage(UIImage(systemName: "chevron.down"), for: .normal)
-        label.tintColor = .label
-        label.isEnabled = true
-        label.addTarget(self, action: #selector(profileAction), for: .touchUpInside)
-        return label
+        let button = UIButton()
+        button.titleLabel?.font = .boldSystemFont(ofSize: 25)
+        button.setTitleColor(.white, for: .normal)
+        button.setImage(UIImage(systemName: "chevron.down"), for: .normal)
+        button.tintColor = .white
+        button.isEnabled = true
+        button.addTarget(self, action: #selector(profileAction), for: .touchUpInside)
+        button.imageEdgeInsets.left = -5
+        button.titleEdgeInsets.right = -5
+        return button
     }()
     
     let stackView3: UIStackView = {
@@ -84,6 +86,8 @@ class MyProfileVC: UIViewController {
         button.addTarget(self, action: #selector(FavoriteAction), for: .touchUpInside)
         button.setImage(UIImage(systemName: "chevron.forward"), for: .normal)
         button.tintColor = .label
+        button.titleEdgeInsets.left = -20
+        button.imageEdgeInsets.right = -130
         button.titleLabel?.font = .systemFont(ofSize: 14)
         return button
     }()
@@ -106,7 +110,6 @@ class MyProfileVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .systemBackground
         let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
         searchButton.tintColor = .label
@@ -267,6 +270,7 @@ class MyProfileVC: UIViewController {
         svc.count = 1
         present(svc, animated: true)
     }
+    
 }
 
 // MARK: - CollectionView Delegate & DataSource Methods
@@ -277,12 +281,14 @@ extension MyProfileVC: UICollectionViewDelegate, UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "ListCollectionViewCell", for: indexPath) as! ListCollectionViewCell
-        let fav = favorites[indexPath.row]
-        if let url = fav.URL{
-            cell.imageView.kf.setImage(with: URL(string: url))
-        }
+            let fav = favorites[indexPath.row]
+            if let url = fav.URL{
+                cell.imageView.kf.setImage(with: URL(string: url))
+            }
+        
         return cell
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let fvc = FavoriteVC()
         fvc.userId = userId
@@ -294,3 +300,4 @@ extension MyProfileVC: UICollectionViewDelegate, UICollectionViewDataSource {
     }
     
 }
+

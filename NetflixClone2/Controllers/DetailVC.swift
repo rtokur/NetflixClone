@@ -75,7 +75,7 @@ class DetailVC: UIViewController {
     let favoriteButton: UIButton = {
         let button = UIButton()
         button.backgroundColor = .systemBackground
-        button.setTitle("Favorites", for: .normal)
+        button.setTitle("My List", for: .normal)
         button.setTitleColor(.label, for: .normal)
         button.contentVerticalAlignment = .center
         button.contentHorizontalAlignment = .center

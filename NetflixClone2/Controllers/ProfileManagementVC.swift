@@ -13,7 +13,7 @@ import Kingfisher
 class ProfileManagementVC: UIViewController, ReloadData {
     //MARK: Protocol
     func didUpdateProfile() {
-        viewWillAppear(true)
+        getProfiles()
     }
     
     //MARK: Properties
@@ -84,10 +84,6 @@ class ProfileManagementVC: UIViewController, ReloadData {
         // Do any additional setup after loading the view.
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-    
     // MARK: - Setup Methods
     func setupViews(){
         
@@ -146,7 +142,8 @@ class ProfileManagementVC: UIViewController, ReloadData {
                         let isEnabled = profile.data()["isEnabled"] as? Bool
                         let profileImageURL = profile.data()["profileImageURL"] as? String
                         let profileName = profile.data()["profileName"] as? String
-                        let prof = Profile(isEnabled: isEnabled, profileImageURL: profileImageURL, profileName: profileName)
+                        let documentId = profile.documentID as? String
+                        let prof = Profile(isEnabled: isEnabled, profileImageURL: profileImageURL, profileName: profileName, documentId: documentId)
                         profiles.append(prof)
                     }
                     profileCollectionView.reloadData()
@@ -193,9 +190,13 @@ extension ProfileManagementVC : UICollectionViewDelegate, UICollectionViewDataSo
             if let url = profile.profileImageURL {
                 cell.imageView.kf.setImage(with: URL(string: url))
             }
+            if profile.isEnabled! {
+                cell.imageView.layer.borderColor = UIColor .white.cgColor
+                cell.imageView.layer.borderWidth = 2
+                cell.label.font = .boldSystemFont(ofSize: 12)
+            }
             cell.label.text = profile.profileName
         }
-        
         return cell
     }
     
@@ -204,7 +205,10 @@ extension ProfileManagementVC : UICollectionViewDelegate, UICollectionViewDataSo
             let evc = EditProfileVC()
             evc.delegate = self
             evc.userId = userId
-            evc.count = count
+            evc.deleteButton.isHidden = true
+            evc.stackView.snp.updateConstraints { make in
+                make.height.equalTo(218)
+            }
             present(evc, animated: true)
         } else {
             let ls = LaunchScreen()
@@ -213,11 +217,12 @@ extension ProfileManagementVC : UICollectionViewDelegate, UICollectionViewDataSo
             let image = profiles[indexPath.row].profileImageURL
             ls.image = image!
             Task{
-                if documentId == "profile\(indexPath.row + 1)" {
+                if documentId == profiles[indexPath.row].documentId {
                     return
                 } else {
                     try await db.collection("Users").document(userId).collection("Profiles").document(documentId).updateData(["isEnabled":false])
-                    try await db.collection("Users").document(userId).collection("Profiles").document("profile\(indexPath.row + 1)").updateData(["isEnabled":true])
+                    guard let document = profiles[indexPath.row].documentId else { return }
+                    try await db.collection("Users").document(userId).collection("Profiles").document(document).updateData(["isEnabled":true])
                     present(ls, animated: true)
                 }
             }
