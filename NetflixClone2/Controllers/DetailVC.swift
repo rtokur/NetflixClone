@@ -389,11 +389,11 @@ class DetailVC: UIViewController {
                     let count = profile.documents.count
                     guard count != 0 else { return }
                     if let documentId = profile.documents[0].documentID as? String {
-                        if let movieId = movie?.id, let movieImage = movie?.posterURL{
-                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movieId, "movieName": movie?.title, "movieImageURL": "\(movieImage)"])
+                        if let movieId = movie?.id, let movieImage = movie?.posterURL, let movieBackImage = detail?.posterURL{
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movieId, "movieName": movie?.title, "movieImageURL": "\(movieImage)", "movieBackImage": "\(movieBackImage)"])
                             favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                        }else if let serieId = serie?.id, let serieImage = serie?.posterURL {
-                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").setData(["serieId":serieId, "serieName": serie?.name, "serieImageURL": "\(serieImage)"])
+                        }else if let serieId = serie?.id, let serieImage = serie?.posterURL, let serieBackImage = detail?.posterURL {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").setData(["serieId":serieId, "serieName": serie?.name, "serieImageURL": "\(serieImage)", "serieBackImage": "\(serieBackImage)"])
                             favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
                         }
                     }
@@ -483,7 +483,6 @@ class DetailVC: UIViewController {
     @objc func BackButton(_ sender: UIBarButtonItem) {
         dismiss(animated: true)
     }
-    
 }
 
 // MARK: - CollectionViewDelegate and DataSource Methods

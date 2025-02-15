@@ -141,6 +141,64 @@ class Connection {
         print(response2)
         return response
     }
+    
+    // MARK: - Creating url search for movies with path
+    func createUrlSearchMovie(value: String) async throws -> MovieResponse {
+        let url = URL(string: "https://api.themoviedb.org/3/search/movie")!
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "query", value: value),
+            URLQueryItem(name: "include_adult", value: "false"),
+            URLQueryItem(name: "language", value: "en-US"),
+            URLQueryItem(name: "page", value: "1"),
+        ]
+        components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+        
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10
+        request.allHTTPHeaderFields = [
+            "accept": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+        ]
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else { throw URLError(.badServerResponse)
+        }
+        let respons = try JSONDecoder().decode(MovieResponse.self, from: data)
+        let respons2 = try JSONSerialization.jsonObject(with: data)
+        print(respons2)
+        return respons
+    }
+    
+    // MARK: - Creating url search for series with path
+    func createUrlSearchSerie(value: String) async throws -> SerieResponse {
+        let url = URL(string: "https://api.themoviedb.org/3/search/tv")!
+        var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
+        let queryItems: [URLQueryItem] = [
+            URLQueryItem(name: "query", value: value),
+            URLQueryItem(name: "include_adult", value: "false"),
+            URLQueryItem(name: "language", value: "en-US"),
+            URLQueryItem(name: "page", value: "1"),
+        ]
+        components.queryItems = components.queryItems.map { $0 + queryItems } ?? queryItems
+        
+        var request = URLRequest(url: components.url!)
+        request.httpMethod = "GET"
+        request.timeoutInterval = 10
+        request.allHTTPHeaderFields = [
+            "accept": "application/json",
+            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+        ]
+        
+        let (data, response) = try await URLSession.shared.data(for: request)
+        guard let httpResponse = response as? HTTPURLResponse else { throw URLError(.badServerResponse)
+        }
+        let respons = try JSONDecoder().decode(SerieResponse.self, from: data)
+        let respons2 = try JSONSerialization.jsonObject(with: data)
+        print(respons2)
+        return respons
+    }
     // MARK: - Calling the creating url func and return the popular movie response
     func getPopularMovies() async throws -> [Movie] {
         let movieResponse: MovieResponse = try await createUrlMovie(path: "/movie/popular")
@@ -186,4 +244,17 @@ class Connection {
         let genres : [Genre] = []
         return genresResponse.genres ?? genres
     }
+    // MARK: - Calling the creating url func and return the search movie response
+    func getSearchMovie( value: String) async throws -> [Movie] {
+        let searchResponse : MovieResponse = try await createUrlSearchMovie(value: value)
+        let movies: [Movie] = []
+        return searchResponse.results ?? movies
+    }
+    // MARK: - Calling the creating url func and return the search serie response
+    func getSearchSerie( value: String) async throws -> [Serie] {
+        let searchResponse : SerieResponse = try await createUrlSearchSerie(value: value)
+        let series: [Serie] = []
+        return searchResponse.results ?? series
+    }
+    
 }

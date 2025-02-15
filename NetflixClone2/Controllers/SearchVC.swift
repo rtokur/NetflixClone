@@ -10,6 +10,12 @@ import UIKit
 class SearchVC: UIViewController, UISearchBarDelegate {
     //MARK: Properties
     var count : Int = 0
+    let connection = Connection()
+    var searchMovie: [Movie] = []
+    var searchSerie: [Serie] = []
+    var search: [Any] = []
+    var userId: String = ""
+    var documentId: String = ""
     
     //MARK: UI Elements
     let scrollView: UIScrollView = {
@@ -45,6 +51,7 @@ class SearchVC: UIViewController, UISearchBarDelegate {
     let searchBar : UISearchBar = {
         let bar = UISearchBar()
         bar.placeholder = "Search movie or serie"
+        bar.searchTextField.addTarget(self, action: #selector(searchBarTextDidBeginEditing), for: .editingChanged)
         bar.tintColor = .label
         return bar
     }()
@@ -56,6 +63,11 @@ class SearchVC: UIViewController, UISearchBarDelegate {
         let collectionview = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionview.showsVerticalScrollIndicator = false
         return collectionview
+    }()
+    
+    let activityIndicator: UIActivityIndicatorView = {
+        let activity = UIActivityIndicatorView(style: .large)
+        return activity
     }()
     
     //MARK: Lifecycle
@@ -79,7 +91,12 @@ class SearchVC: UIViewController, UISearchBarDelegate {
         searchBar.delegate = self
         stackView2.addArrangedSubview(searchBar)
         
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.register(SearchCollectionViewCell.self, forCellWithReuseIdentifier: "SearchCollectionViewCell")
         stackView.addArrangedSubview(collectionView)
+        
+        view.addSubview(activityIndicator)
     }
     
     func setupConstraints(){
@@ -108,13 +125,71 @@ class SearchVC: UIViewController, UISearchBarDelegate {
             make.height.equalToSuperview()
         }
         collectionView.snp.makeConstraints { make in
-            make.height.equalTo(1)
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
             make.width.equalToSuperview()
+        }
+        activityIndicator.snp.makeConstraints { make in
+            make.center.equalTo(collectionView)
         }
     }
     
     //MARK: Actions
     @objc func BackButton(_ sender:UIButton){
         dismiss(animated: true)
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        let text = searchBar.text!
+        if text.count >= 3 {
+            activityIndicator.startAnimating()
+            Task {
+                searchMovie = try await connection.getSearchMovie(value: text)
+                searchSerie = try await connection.getSearchSerie(value: text)
+                search = searchMovie + searchSerie
+                collectionView.reloadData()
+                activityIndicator.stopAnimating()
+            }
+        }
+        else {
+            searchSerie = []
+            searchMovie = []
+            search = []
+            collectionView.reloadData()
+        }
+    }
+}
+
+// MARK: - CollectionView Delegate & DataSource Methods
+extension SearchVC : UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return search.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "SearchCollectionViewCell", for: indexPath) as! SearchCollectionViewCell
+        let searchh = search[indexPath.row]
+        if let movie = searchh as? Movie {
+            cell.imageView.kf.setImage(with: movie.posterBackURL)
+            cell.label.text = movie.title
+        }else if let serie = searchh as? Serie {
+            cell.imageView.kf.setImage(with: serie.posterBackURL)
+            cell.label.text = serie.name
+        }
+        return cell
+    }
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let dvc = DetailVC()
+        let searchh = search[indexPath.row]
+        if let movie = searchh as? Movie {
+            dvc.movie = movie
+        }else if let serie = searchh as? Serie {
+            dvc.serie = serie
+        }
+        dvc.userId = userId
+        dvc.documentId = documentId
+        let nvc = UINavigationController(rootViewController: dvc)
+        nvc.modalPresentationStyle = .fullScreen
+        nvc.isModalInPresentation = true
+        present(nvc, animated: true)
     }
 }

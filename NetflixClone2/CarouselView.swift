@@ -25,6 +25,7 @@ class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
     weak var delegate2: MakeAlert2?
     weak var delegate: CarouselViewDelegate?
     private var upcomingData : [Movie] = []
+    private var upcomingDetail: [Detail] = []
     private var currentPage = 0
     private var genres: [Genre] = []
     var documentId: String = ""
@@ -34,9 +35,9 @@ class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
     private lazy var upComingMovieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 366, height: 580)
+        layout.itemSize = CGSize(width: 367, height: 590)
+        layout.minimumLineSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .clear
         collectionView.dataSource = self
         collectionView.isPagingEnabled = true
         collectionView.delegate = self
@@ -110,6 +111,7 @@ extension CarouselView: UICollectionViewDataSource {
         
         let url = upcomingData[indexPath.row].posterURL
         cell.movie = upcomingData[indexPath.row]
+        cell.detail = upcomingDetail[indexPath.row]
         var genreName: [String] = []
         if let data = upcomingData[indexPath.row].genreIds {
             for genreId in data {
@@ -136,9 +138,10 @@ extension CarouselView: UICollectionViewDataSource {
 
 // MARK: - Update Method
 extension CarouselView {
-    public func configureView(with data: [Movie], data2: [Genre]) {
+    public func configureView(with data: [Movie], data2: [Genre], data3: [Detail]) {
         self.upcomingData = data
         self.genres = data2
+        self.upcomingDetail = data3
         self.pageControl.numberOfPages = data.count
         upComingMovieCollectionView.reloadData()
     }

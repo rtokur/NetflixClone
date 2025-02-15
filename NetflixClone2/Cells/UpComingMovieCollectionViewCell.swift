@@ -9,13 +9,17 @@ import UIKit
 import SnapKit
 import Kingfisher
 import FirebaseFirestore
+
+// MARK: - Protocol
 protocol MakeAlert: AnyObject {
     func makeAlert()
 }
+
 class UpComingMovieCollectionViewCell: UICollectionViewCell {
     // MARK: - Properties
     weak var delegate: MakeAlert?
     var movie: Movie?
+    var detail: Detail?
     var userId: String = ""
     var documentId: String = ""
     let db = Firestore.firestore()
@@ -135,44 +139,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         stackView3.addArrangedSubview(favoriteButton)
     }
     
-    
-    // MARK: - Favorite Button Action method
-    @objc func favoriteButtonAction(_ sender: UIButton!) {
-        if userId != "" {
-            if favoriteButton.currentImage == UIImage(systemName: "plus") {
-                Task{
-                    if userId != "" {
-                        if documentId != "" {
-                            if let movieId = movie?.id, let movieImage = movie?.posterURL {
-                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movie?.id,"movieName":movie?.title,"movieImageURL":"\(movieImage)"])
-                                favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
-                            }
-                            
-                        }
-                    }
-                }
-            } else if favoriteButton.currentImage == UIImage(systemName: "checkmark"){
-                Task{
-                    if userId != "" {
-                        if documentId != "" {
-                            if let movieId = movie?.id {
-                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
-                                favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
-                            }
-                        }
-                        
-                    }
-                }
-                
-            }
-        } else {
-            delegate?.makeAlert()
-        }
-    }
-    // MARK: - Play Button Action method
-    @objc func playButtonAction(sender: UIButton!) {
-        print("playbuttontapped")
-    }
     // MARK: - Setup Constraints
     private func setupConstraints() {
         imageView.snp.makeConstraints { make in
@@ -201,6 +167,44 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         favoriteButton.snp.makeConstraints { make in
             make.height.equalToSuperview()
         }
+    }
+    
+    // MARK: - Favorite Button Action method
+    @objc func favoriteButtonAction(_ sender: UIButton!) {
+        if userId != "" {
+            if favoriteButton.currentImage == UIImage(systemName: "plus") {
+                Task{
+                    if userId != "" {
+                        if documentId != "" {
+                            if let movieId = movie?.id, let movieImage = movie?.posterURL, let movieBackImage = detail?.posterURL{
+                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movie?.id,"movieName":movie?.title,"movieImageURL":"\(movieImage)", "movieBackImage": "\(movieBackImage)"])
+                                favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                            }
+                        }
+                    }
+                }
+            } else if favoriteButton.currentImage == UIImage(systemName: "checkmark"){
+                Task{
+                    if userId != "" {
+                        if documentId != "" {
+                            if let movieId = movie?.id {
+                                try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                                favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                            }
+                        }
+                        
+                    }
+                }
+                
+            }
+        } else {
+            delegate?.makeAlert()
+        }
+    }
+    
+    // MARK: - Play Button Action method
+    @objc func playButtonAction(sender: UIButton!) {
+        print("playbuttontapped")
     }
     
     // MARK: - Configure ImageView

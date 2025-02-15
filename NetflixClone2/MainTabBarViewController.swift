@@ -41,7 +41,7 @@ class MainTabBarViewController: UITabBarController{
         activityIndicator.startAnimating()
             //MARK: -Main Controllers
             var vc1 = UINavigationController(rootViewController: HomeVC())
-            let vc2 = SearchVC()
+            var vc2 = SearchVC()
             var vc3 = UINavigationController(rootViewController: LoginVC())
             
             //MARK: -TabBar Symbols
@@ -64,6 +64,8 @@ class MainTabBarViewController: UITabBarController{
                 vc1 = UINavigationController(rootViewController: hvc)
                 vc1.title = "Home"
                 vc1.tabBarItem.image = UIImage(systemName: "house")
+                vc2.documentId = documentId
+                vc2.userId = userId
                 let mpvc3 = MyProfileVC()
                 let data = try! Data(contentsOf: URL(string: profileImageURL)!)
                 let image = UIImage(data: data)

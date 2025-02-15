@@ -21,7 +21,6 @@ class MyProfileVC: UIViewController {
     var favorites: [Favorite] = []
     
     // MARK: - UI Elements
-    
     let scrollView: UIScrollView = {
         let scrollview = UIScrollView()
         scrollview.showsVerticalScrollIndicator = false
@@ -209,9 +208,13 @@ class MyProfileVC: UIViewController {
             let count = favorite.documents.count
             guard count != 0 else { return }
             for favorite in favorite.documents {
-                if let id = favorite.data()["movieId"] as? Int, let URL = favorite.data()["movieImageURL"] as? String, let name = favorite.data()["movieName"] as? String {
-                    let fav = Favorite(id: id, URL: URL, name: name)
-                    favorites.append(fav)
+                if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieImageURL"] as? String, let movieId = favorite.data()["movieId"] as? Int {
+                    let favoritee = Favorite(id: movieId, URL: movieImage, name: name)
+                    favorites.append(favoritee)
+                    
+                } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieImageURL"] as? String, let serieId = favorite.data()["serieId"] as? Int {
+                    let favoritee = Favorite(id: serieId, URL: serieImage, name: name)
+                    favorites.append(favoritee)
                 }
             }
             listCollectionView.reloadData()

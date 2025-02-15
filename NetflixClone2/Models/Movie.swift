@@ -15,6 +15,7 @@ class Movie: Codable {
     let posterPath:String?
     let genreIds: [Int]?
     let vote: Double?
+    let backdropPath: String?
     
     // MARK: - Computed Properties
     var posterURL: URL? {
@@ -23,8 +24,16 @@ class Movie: Codable {
         }
         return url
     }
+    
+    var posterBackURL: URL? {
+        guard let posterPath = backdropPath, let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") else {
+            return nil
+        }
+        return url
+    }
     // MARK: - Coding Keys
     private enum CodingKeys: String,CodingKey {
+        case backdropPath = "backdrop_path"
         case id
         case title
         case overview
@@ -32,5 +41,6 @@ class Movie: Codable {
         case posterPath = "poster_path"
         case genreIds = "genre_ids"
         case vote = "vote_average"
+
     }
 }

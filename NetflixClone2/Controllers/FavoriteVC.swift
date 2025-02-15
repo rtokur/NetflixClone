@@ -93,11 +93,11 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
                     guard count != 0 else { return }
                     
                     for favorite in favoritess.documents {
-                        if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieImageURL"] as? String, let movieId = favorite.data()["movieId"] as? Int {
+                        if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieBackImage"] as? String, let movieId = favorite.data()["movieId"] as? Int {
                             let favoritee = Favorite(id: movieId, URL: movieImage, name: name)
                             favorites.append(favoritee)
                             
-                        } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieImageURL"] as? String, let serieId = favorite.data()["serieId"] as? Int {
+                        } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieBackImage"] as? String, let serieId = favorite.data()["serieId"] as? Int {
                             let favoritee = Favorite(id: serieId, URL: serieImage, name: name)
                             favorites.append(favoritee)
                         }

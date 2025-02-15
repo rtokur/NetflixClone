@@ -33,6 +33,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
     private lazy var topRated: [Movie] = []
     lazy var upComing: [Movie] = []
     lazy var genres: [Genre] = []
+    lazy var upComingDetail: [Detail] = []
     private lazy var popularSeries: [Serie] = []
     var userId: String = ""
     var upComingView = CarouselView()
@@ -169,7 +170,11 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
             upComing = try await connection.getUpComingMovies()
             topRated = try await connection.getTopRatedMovies()
             genres = try await connection.getGenresMovie()
-            upComingView.configureView(with: upComing, data2: genres)
+            for upcome in upComing {
+                let up = try await connection.getMovieDetail(movieId: upcome.id ?? 0)
+                upComingDetail.append(up)
+            }
+            upComingView.configureView(with: upComing, data2: genres, data3: upComingDetail)
             popularMovieCollectionView.reloadData()
             popularSerieCollectionView.reloadData()
             topRatedCollectionView.reloadData()
@@ -310,7 +315,10 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
             dVC.serie = popularSeries[indexPath.row]
             dVC.userId = userId
             dVC.documentId = documentId
-            self.present(dVC, animated: true, completion: nil)
+            let nvc = UINavigationController(rootViewController: dVC)
+            nvc.modalPresentationStyle = .fullScreen
+            nvc.isModalInPresentation = true
+            self.present(nvc, animated: true, completion: nil)
         }else{
             if collectionView == topRatedCollectionView {
                 dVC.movie = topRated[indexPath.row]
@@ -322,7 +330,10 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
                 dVC.userId = userId
                 dVC.documentId = documentId
             }
-            self.present(dVC, animated: true, completion: nil)
+            let nvc = UINavigationController(rootViewController: dVC)
+            nvc.modalPresentationStyle = .fullScreen
+            nvc.isModalInPresentation = true
+            self.present(nvc, animated: true, completion: nil)
         }
     }
     
