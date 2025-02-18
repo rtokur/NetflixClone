@@ -35,7 +35,6 @@ class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
     private lazy var upComingMovieCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 367, height: 590)
         layout.minimumLineSpacing = 0
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.dataSource = self
@@ -49,6 +48,7 @@ class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
         let pageControl = UIPageControl()
         pageControl.pageIndicatorTintColor = .gray
         pageControl.currentPageIndicatorTintColor = .white
+        pageControl.addTarget(self, action: #selector(pageControlTapped(_:)), for: .valueChanged)
         return pageControl
     }()
     
@@ -96,10 +96,17 @@ class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
         }
     }
     
+    // MARK: - Actions
+    @objc func pageControlTapped(_ sender: UIPageControl){
+        let pageIndex = IndexPath(item: sender.currentPage, section: 0)
+        upComingMovieCollectionView.scrollToItem(at: pageIndex, at: .centeredHorizontally, animated: true)
+    }
+    
+    
 }
 
 // MARK: - UICollectionViewDataSource
-extension CarouselView: UICollectionViewDataSource {
+extension CarouselView: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout{
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -133,6 +140,11 @@ extension CarouselView: UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let upcomingMovie = upcomingData[indexPath.row]
         delegate?.didSelectMovie(upcomingMovie)
+    }
+    
+    // Hücre boyutunu CollectionView'ın boyutuna göre ayarla
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        return CGSize(width: collectionView.frame.width, height: collectionView.frame.height)
     }
 }
 

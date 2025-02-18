@@ -173,6 +173,7 @@ class DetailVC: UIViewController {
         super.viewDidLoad()
         
         view.backgroundColor = .systemBackground
+        activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
         getData()
@@ -218,6 +219,7 @@ class DetailVC: UIViewController {
                     genresLabel.text = "\(genresName.joined(separator: " • "))"
                 }
                 seasonButton.backgroundColor = .clear
+                activityIndicator.stopAnimating()
             }
         }
         else if let serieId = serie?.id {
@@ -255,6 +257,7 @@ class DetailVC: UIViewController {
                     seasonButton.menu?.displayPreferences = .none
                     episodeLabel.isHidden = true
                     episodeCollectionView.reloadData()
+                    activityIndicator.stopAnimating()
                     
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
                     runtimeLabel.text = "\(numberOfEpisodes) Episodes"
@@ -274,6 +277,7 @@ class DetailVC: UIViewController {
                     }
                     episodeLabel.text = "Episodes"
                     episodeCollectionView.reloadData()
+                    activityIndicator.stopAnimating()
                 }
             }
         }

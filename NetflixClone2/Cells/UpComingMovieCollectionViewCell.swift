@@ -81,7 +81,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         let stackView3 = UIStackView()
         stackView3.axis = .horizontal
         stackView3.spacing = 13
-        stackView3.alignment = .fill
         stackView3.distribution = .fillEqually
         return stackView3
     }()
@@ -111,6 +110,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
     
     override func layoutSubviews() {
         super.layoutSubviews()
+        view.layoutIfNeeded()
         gradiantLayer.frame = view.bounds
     }
     
@@ -132,9 +132,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         
         stackView.addArrangedSubview(stackView3)
         
-        // MARK: - Play Button
         stackView3.addArrangedSubview(playButton)
-        
         
         stackView3.addArrangedSubview(favoriteButton)
     }
@@ -145,13 +143,14 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
             make.edges.equalToSuperview()
         }
         view.snp.makeConstraints { make in
-            make.height.equalTo(120)
+            make.height.equalTo(160)
             make.centerX.equalTo(imageView.snp.centerX)
             make.bottom.equalToSuperview()
             make.width.equalToSuperview()
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(13)
+            make.leading.trailing.top.equalToSuperview().inset(13)
+            make.bottom.equalToSuperview().inset(40)
         }
         genreLabel.snp.makeConstraints { make in
             make.width.equalToSuperview()

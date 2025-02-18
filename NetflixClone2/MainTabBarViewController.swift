@@ -41,7 +41,7 @@ class MainTabBarViewController: UITabBarController{
         activityIndicator.startAnimating()
             //MARK: -Main Controllers
             var vc1 = UINavigationController(rootViewController: HomeVC())
-            var vc2 = SearchVC()
+            let vc2 = SearchVC()
             var vc3 = UINavigationController(rootViewController: LoginVC())
             
             //MARK: -TabBar Symbols
