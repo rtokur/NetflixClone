@@ -14,16 +14,28 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
         let posterImageView2 = UIImageView()
         posterImageView2.contentMode = .scaleAspectFill
         posterImageView2.layer.cornerRadius = 8
+        posterImageView2.backgroundColor = .purple
         posterImageView2.clipsToBounds = true
         return posterImageView2
     }()
     
-    let voteLabel : UILabel = {
-        let voteLabel = UILabel()
-        voteLabel.textColor = .label
-        voteLabel.font = .italicSystemFont(ofSize: 15)
-        voteLabel.textAlignment = .center
-        return voteLabel
+    let stackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .horizontal
+        return stackView
+    }()
+    
+    let view : UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    let numberLabel : UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.textAlignment = .center
+        label.font = .boldSystemFont(ofSize: 90)
+        return label
     }()
     
     override init (frame: CGRect) {
@@ -38,20 +50,24 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Setup Views
     private func setupViews() {
-        contentView.addSubview(voteLabel)
-        
-        contentView.addSubview(posterImageView2)
+        contentView.addSubview(view)
+        view.addSubview(posterImageView2)
+        view.addSubview(numberLabel)
     }
     
     // MARK: - Setup Constraints
     private func setupConstraints() {
-        posterImageView2.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(contentView.snp.height)
-        }
-        voteLabel.snp.makeConstraints { make in
-            make.top.equalTo(posterImageView2.snp.bottom)
+        view.snp.makeConstraints { make in
+            make.edges.equalTo(contentView)
         }
         
+        numberLabel.snp.makeConstraints { make in
+            make.bottom.top.equalToSuperview()
+            make.leading.equalToSuperview().inset(25)
+        }
+        posterImageView2.snp.makeConstraints { make in
+            make.bottom.top.trailing.equalToSuperview()
+            make.width.equalTo(105)
+        }
     }
 }

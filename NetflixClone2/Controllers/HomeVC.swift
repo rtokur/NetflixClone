@@ -7,15 +7,44 @@
 import UIKit
 import SnapKit
 import Kingfisher
-class HomeVC: UIViewController {
+
+class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
+    
+    func makeAlert2() {
+        let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+        present(alert, animated: true)
+    }
+    
+    // MARK: - Protocol from CarouselView
+    func didSelectMovie(_ upcoming: Movie) {
+        let dVC = DetailVC()
+        dVC.movie = upcoming
+        dVC.userId = userId
+        dVC.documentId = documentId
+        dVC.modalPresentationStyle = .fullScreen
+        dVC.isModalInPresentation = true
+        present(dVC, animated: true)
+    }
     
     // MARK: - Properties
     let connection = Connection()
+    private lazy var popularMovies: [Movie] = []
+    private lazy var topRated: [Movie] = []
+    lazy var upComing: [Movie] = []
+    lazy var genres: [Genre] = []
+    lazy var upComingDetail: [Detail] = []
+    private lazy var popularSeries: [Serie] = []
+    var userId: String = ""
+    var upComingView = CarouselView()
+    var documentId: String = ""
+    var profileName: String = ""
     
+    //MARK: UI Elements
     private let stackView : UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 16
+        stackView.spacing = 10
         stackView.alignment = .fill
         stackView.distribution = .fill
         return stackView
@@ -40,18 +69,7 @@ class HomeVC: UIViewController {
     private lazy var topRatedCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 105, height: 175)
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .clear
-        collectionView.showsHorizontalScrollIndicator = false
-        return collectionView
-    }()
-    
-    private lazy var upComingMovieCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        layout.itemSize = CGSize(width: 300, height: 500)
-        layout.minimumInteritemSpacing = 1
+        layout.itemSize = CGSize(width: 210, height: 175)
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collectionView.backgroundColor = .clear
         collectionView.showsHorizontalScrollIndicator = false
@@ -70,7 +88,7 @@ class HomeVC: UIViewController {
     
     private let popularTitleLabel : UILabel = {
         let popularTitleLabel = UILabel()
-        popularTitleLabel.textColor = .label
+        popularTitleLabel.textColor = .white
         popularTitleLabel.numberOfLines = 1
         popularTitleLabel.textAlignment = .left
         popularTitleLabel.font = .boldSystemFont(ofSize: 17)
@@ -85,14 +103,9 @@ class HomeVC: UIViewController {
         return activityIndicator
     }()
     
-    var popularMovies: [Movie] = []
-    private lazy var topRated: [Movie] = []
-    private lazy var upComing: [Movie] = []
-    var popularSeries: [Serie] = []
-    
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
-        topRatedTitleLabel.textColor = .label
+        topRatedTitleLabel.textColor = .white
         topRatedTitleLabel.numberOfLines = 1
         topRatedTitleLabel.textAlignment = .left
         topRatedTitleLabel.font = .boldSystemFont(ofSize: 17)
@@ -102,57 +115,87 @@ class HomeVC: UIViewController {
     
     private let popularSerieTitleLabel : UILabel = {
         let popularSerieTitleLabel = UILabel()
-        popularSerieTitleLabel.textColor = .label
+        popularSerieTitleLabel.textColor = .white
         popularSerieTitleLabel.numberOfLines = 1
         popularSerieTitleLabel.textAlignment = .left
         popularSerieTitleLabel.font = .boldSystemFont(ofSize: 17)
         popularSerieTitleLabel.text = "Popular Series"
         return popularSerieTitleLabel
     }()
+    
+    let nameLabel : UILabel = {
+        let label = UILabel()
+        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 23)
+        return label
+    }()
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        if userId != "" {
+            let label = UIBarButtonItem(title: "For \(profileName)", style: .done, target: nil, action: nil)
+            label.tintColor = .white
+            navigationItem.leftBarButtonItem = label
+        }
+        let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
+        searchButton.tintColor = .white
+        navigationItem.rightBarButtonItems = [searchButton]
+        navigationController?.navigationBar.isTranslucent = true
         activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
         getData()
         registerCells()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        upComingView.reloadData()
+    }
+    
     //MARK: -Register Cells for loading
     private func registerCells() {
-        upComingMovieCollectionView.register(UpComingMovieCollectionViewCell.self, forCellWithReuseIdentifier: "UpComingMovieCollectionViewCell")
         popularMovieCollectionView.register(PopularMovieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularMovieCollectionViewCell")
         topRatedCollectionView.register(TopRatedMovieCollectionViewCell.self, forCellWithReuseIdentifier: "TopRatedMovieCollectionViewCell")
         popularSerieCollectionView.register(PopularSerieCollectionViewCell.self, forCellWithReuseIdentifier: "PopularSerieCollectionViewCell")
     }
+    
     //MARK: -Make call for movies and series from API
     private func getData() {
         Task {
             popularMovies = try await connection.getPopularMovies()
             popularSeries = try await connection.getPopularSeries()
+            popularSeries = popularSeries + popularSeries + popularSeries + popularSeries + popularSeries + popularSeries + popularSeries
             upComing = try await connection.getUpComingMovies()
             topRated = try await connection.getTopRatedMovies()
-            upComingMovieCollectionView.reloadData()
+            genres = try await connection.getGenresMovie()
+            for upcome in upComing {
+                let up = try await connection.getMovieDetail(movieId: upcome.id ?? 0)
+                upComingDetail.append(up)
+            }
+            upComingView.configureView(with: upComing, data2: genres, data3: upComingDetail)
             popularMovieCollectionView.reloadData()
             popularSerieCollectionView.reloadData()
             topRatedCollectionView.reloadData()
             activityIndicator.stopAnimating()
         }
-        
     }
+    
     // MARK: - Setup Views
     private func setupViews()  {
         view.backgroundColor = .systemBackground
-
+        
         view.addSubview(scrollView)
-
+        
         scrollView.addSubview(stackView)
         
-        //Delegate and data source operations
-        upComingMovieCollectionView.delegate = self
-        upComingMovieCollectionView.dataSource = self
-        stackView.addArrangedSubview(upComingMovieCollectionView)
+        upComingView.delegate = self
+        upComingView.documentId = documentId
+        upComingView.userId = userId
+        upComingView.delegate2 = self
+        stackView.addArrangedSubview(upComingView)
         
         stackView.addArrangedSubview(popularTitleLabel)
         
@@ -184,19 +227,18 @@ class HomeVC: UIViewController {
             make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalTo(scrollView.contentLayoutGuide) // ScrollView'in içeriğine bağla
-            make.width.equalTo(scrollView.frameLayoutGuide)// Genişlik sabit kalmalı
+            make.edges.equalTo(scrollView.contentLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
-        upComingMovieCollectionView.snp.makeConstraints { make in
-            make.height.equalTo(550)
+        upComingView.snp.makeConstraints { make in
+            make.height.equalTo(650)
         }
         popularTitleLabel.snp.makeConstraints { make in
             make.height.equalTo(25)
         }
-        
         popularMovieCollectionView.snp.makeConstraints { make in
             make.height.equalTo(175)
         }
@@ -214,38 +256,39 @@ class HomeVC: UIViewController {
         }
         
     }
+    
+    //    MARK: Actions
+    @objc func searchButton(_ sender: UIBarButtonItem) {
+        let svc = SearchVC()
+        svc.modalPresentationStyle = .fullScreen
+        svc.isModalInPresentation = true
+        svc.count = 1
+        present(svc, animated: true)
+    }
 }
 
 
 // MARK: - UICollectionView Delegate & DataSource
 extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if collectionView == topRatedCollectionView {
             return topRated.count
-        }else if collectionView == upComingMovieCollectionView {
-            return upComing.count
         } else if collectionView == popularSerieCollectionView {
             return popularSeries.count
         }
         return popularMovies.count
         
     }
+    
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         if collectionView == topRatedCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "TopRatedMovieCollectionViewCell", for: indexPath) as! TopRatedMovieCollectionViewCell
             let movie = topRated[indexPath.row]
-            cell.voteLabel.text = "\(movie.vote)"
+            cell.numberLabel.text = "\(indexPath.row + 1)"
             if let url = movie.posterURL {
                 cell.posterImageView2.kf.setImage(with: url)
             }
-            return cell
-        }else if collectionView == upComingMovieCollectionView {
-            let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "UpComingMovieCollectionViewCell", for: indexPath) as! UpComingMovieCollectionViewCell
-            let movie = upComing[indexPath.row]
-            if let url = movie.posterURL {
-                cell.imageView.kf.setImage(with: url)
-            }
-
             return cell
         }else if collectionView == popularSerieCollectionView {
             let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PopularSerieCollectionViewCell", for: indexPath) as! PopularSerieCollectionViewCell
@@ -258,36 +301,41 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
         }
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "PopularMovieCollectionViewCell", for: indexPath) as! PopularMovieCollectionViewCell
         let movie = popularMovies[indexPath.row]
-            
+        
         if let url = movie.posterURL {
             cell.posterImageVieww.kf.setImage(with: url)
         }
         return cell
-        
     }
     
-    
     // MARK: - DetailVC passes
-    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         // handle tap events
-        dismiss(animated: true, completion: nil)
         let dVC = DetailVC()
         if collectionView == popularSerieCollectionView {
             dVC.serie = popularSeries[indexPath.row]
+            dVC.userId = userId
+            dVC.documentId = documentId
+            dVC.modalPresentationStyle = .fullScreen
+            dVC.isModalInPresentation = true
             self.present(dVC, animated: true, completion: nil)
         }else{
             if collectionView == topRatedCollectionView {
                 dVC.movie = topRated[indexPath.row]
-            }else if collectionView == upComingMovieCollectionView {
-                dVC.movie = upComing[indexPath.row]
+                dVC.userId = userId
+                dVC.documentId = documentId
             }
             else {
                 dVC.movie = popularMovies[indexPath.row]
+                dVC.userId = userId
+                dVC.documentId = documentId
             }
+            dVC.modalPresentationStyle = .fullScreen
+            dVC.isModalInPresentation = true
             self.present(dVC, animated: true, completion: nil)
         }
-        
     }
     
 }
+
+

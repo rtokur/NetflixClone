@@ -8,13 +8,14 @@
 import Foundation
 class Serie: Codable {
     // MARK: - Properties
-    let id: Int?
-    let name: String?
+    var id: Int?
+    var name: String?
     let overview: String?
     let genreIds: [Int]?
     let posterPath: String?
     let vote: Double?
     let firstAirDate: String?
+    let backdropPath: String?
     
     // MARK: - Computed Properties
     var posterURL: URL? {
@@ -24,7 +25,15 @@ class Serie: Codable {
         return url
     }
     
+    var posterBackURL: URL? {
+        guard let posterPath = backdropPath, let url = URL(string: "https://image.tmdb.org/t/p/w500\(posterPath)") else {
+            return nil
+        }
+        return url
+    }
+    
     private enum CodingKeys: String,CodingKey {
+        case backdropPath = "backdrop_path"
         case id
         case name
         case overview

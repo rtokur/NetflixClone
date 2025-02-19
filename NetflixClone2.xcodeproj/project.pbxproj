@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		0B762C142D4F08130014B06A /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 0B762C132D4F08130014B06A /* Kingfisher */; };
 		0B762C172D4F08200014B06A /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 0B762C162D4F08200014B06A /* SnapKit */; };
+		0BD847B92D56BB9000151E19 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 0BD847B82D56BB9000151E19 /* FirebaseAnalytics */; };
+		0BD847BB2D56BB9000151E19 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 0BD847BA2D56BB9000151E19 /* FirebaseAuth */; };
+		0BD847BD2D56BB9000151E19 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0BD847BC2D56BB9000151E19 /* FirebaseDatabase */; };
+		0BD847BF2D56BB9000151E19 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 0BD847BE2D56BB9000151E19 /* FirebaseFirestore */; };
+		0BD847C12D56BB9000151E19 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 0BD847C02D56BB9000151E19 /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -41,8 +46,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0BD847BD2D56BB9000151E19 /* FirebaseDatabase in Frameworks */,
 				0B762C142D4F08130014B06A /* Kingfisher in Frameworks */,
 				0B762C172D4F08200014B06A /* SnapKit in Frameworks */,
+				0BD847B92D56BB9000151E19 /* FirebaseAnalytics in Frameworks */,
+				0BD847C12D56BB9000151E19 /* FirebaseStorage in Frameworks */,
+				0BD847BB2D56BB9000151E19 /* FirebaseAuth in Frameworks */,
+				0BD847BF2D56BB9000151E19 /* FirebaseFirestore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -87,6 +97,11 @@
 			packageProductDependencies = (
 				0B762C132D4F08130014B06A /* Kingfisher */,
 				0B762C162D4F08200014B06A /* SnapKit */,
+				0BD847B82D56BB9000151E19 /* FirebaseAnalytics */,
+				0BD847BA2D56BB9000151E19 /* FirebaseAuth */,
+				0BD847BC2D56BB9000151E19 /* FirebaseDatabase */,
+				0BD847BE2D56BB9000151E19 /* FirebaseFirestore */,
+				0BD847C02D56BB9000151E19 /* FirebaseStorage */,
 			);
 			productName = NetflixClone2;
 			productReference = 0B762A772D4E6D360014B06A /* NetflixClone2.app */;
@@ -119,6 +134,7 @@
 			packageReferences = (
 				0B762C122D4F08130014B06A /* XCRemoteSwiftPackageReference "Kingfisher" */,
 				0B762C152D4F08200014B06A /* XCRemoteSwiftPackageReference "SnapKit" */,
+				0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0B762A782D4E6D360014B06A /* Products */;
@@ -163,7 +179,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NetflixClone2/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -191,7 +207,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = NetflixClone2/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -366,6 +382,14 @@
 				minimumVersion = 5.7.1;
 			};
 		};
+		0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.8.1;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -378,6 +402,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 0B762C152D4F08200014B06A /* XCRemoteSwiftPackageReference "SnapKit" */;
 			productName = SnapKit;
+		};
+		0BD847B82D56BB9000151E19 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		0BD847BA2D56BB9000151E19 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		0BD847BC2D56BB9000151E19 /* FirebaseDatabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseDatabase;
+		};
+		0BD847BE2D56BB9000151E19 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		0BD847C02D56BB9000151E19 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0BD847B72D56BB9000151E19 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

@@ -8,10 +8,17 @@
 import UIKit
 import SnapKit
 import Kingfisher
+import FirebaseFirestore
+import FirebaseAuth
+
 class DetailVC: UIViewController {
-    // MARK: - UI Elements
+    // MARK: - Properties
     let connection = Connection()
+    let db = Firestore.firestore()
+    var userId: String = ""
+    var documentId: String = ""
     
+    // MARK: - UI Elements
     let imageView : UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFill
@@ -20,25 +27,11 @@ class DetailVC: UIViewController {
         return imageView
     }()
     
-    let view2 : UIView = {
-        let view2 = UIView()
-        view2.layer.cornerRadius = 8
-        view2.clipsToBounds = true
-        return view2
+    let scrollView : UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.showsVerticalScrollIndicator = false
+        return scrollView
     }()
-    
-    
-    let playButton : UIButton = {
-        let playButton = UIButton()
-        playButton.backgroundColor = .white.withAlphaComponent(0.9)
-        playButton.setImage(UIImage(systemName: "play.fill"),for: UIControl.State.normal)
-        playButton.tintColor = .black
-        playButton.layer.cornerRadius = 8
-        playButton.addTarget(self, action: #selector(playButtonAction), for: .touchUpInside)
-        return playButton
-    }()
-    
-    let scrollView = UIScrollView()
     
     let stackView : UIStackView = {
         let stackView = UIStackView()
@@ -68,7 +61,7 @@ class DetailVC: UIViewController {
     
     let playButton2 : UIButton = {
         let playButton2 = UIButton()
-        playButton2.backgroundColor = .label
+        playButton2.backgroundColor = .white
         playButton2.setImage(UIImage(systemName: "play.fill"), for: UIControl.State.normal)
         playButton2.tintColor = .systemBackground
         playButton2.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 15)
@@ -77,6 +70,23 @@ class DetailVC: UIViewController {
         playButton2.setTitleColor(.systemBackground, for: UIControl.State.normal)
         playButton2.layer.cornerRadius = 3
         return playButton2
+    }()
+    
+    let favoriteButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemBackground
+        button.setTitle("My List", for: .normal)
+        button.setTitleColor(.white, for: .normal)
+        button.contentVerticalAlignment = .center
+        button.contentHorizontalAlignment = .center
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.imageView?.contentMode = .scaleAspectFit
+        button.titleLabel?.font = UIFont.systemFont(ofSize: 9, weight: .bold)
+        button.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
+        button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: -40)
+        button.titleEdgeInsets = UIEdgeInsets(top: 38, left: -20, bottom: 0, right: 0)
+        button.tintColor = .white
+        return button
     }()
     
     let activityIndicator : UIActivityIndicatorView = {
@@ -90,8 +100,17 @@ class DetailVC: UIViewController {
         let descriptionLabel  = UILabel()
         descriptionLabel.font = .systemFont(ofSize: 13)
         descriptionLabel.textAlignment = .left
-        descriptionLabel.numberOfLines = .max
+        descriptionLabel.numberOfLines = 0
+        descriptionLabel.lineBreakMode = .byWordWrapping
         return descriptionLabel
+    }()
+    
+    let genresLabel : UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 13)
+        label.textAlignment = .left
+        label.numberOfLines = 1
+        return label
     }()
     
     let titleLabel : UILabel = {
@@ -109,20 +128,80 @@ class DetailVC: UIViewController {
         runtimeLabel.textAlignment = .left
         return runtimeLabel
     }()
+    
+    let seasonButton: UIButton = {
+        let button = UIButton()
+        button.backgroundColor = .systemGray3
+        button.setTitleColor(.lightGray, for: .normal)
+        button.layer.cornerRadius = 5
+        return button
+    }()
+    
+    
+    let episodeLabel : UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 1
+        label.textAlignment = .left
+        label.font = .boldSystemFont(ofSize: 14)
+        return label
+    }()
+    
+    let episodeCollectionView : UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.scrollDirection = .vertical
+        layout.itemSize = CGSize(width: 360, height: 160)
+        layout.minimumInteritemSpacing = 0
+        layout.minimumLineSpacing = 0
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.translatesAutoresizingMaskIntoConstraints = false
+        collectionView.backgroundColor = .systemBackground
+        collectionView.isScrollEnabled = false
+        
+        collectionView.showsVerticalScrollIndicator = false
+        return collectionView
+    }()
+    
+    let View: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    let backButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        button.tintColor = .black
+        button.addTarget(self, action: #selector(BackButton), for: .touchUpInside)
+        return button
+    }()
     // MARK: - Empty Objects
     var movie : Movie?
     var serie : Serie?
     var detail : Detail?
-    var genres : [Genre]?
+    var genres : [Genre]? = []
+    var episode : [Episode]? = []
+    var menuChildren : [UIMenuElement] = []
+    
+    // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-
         view.backgroundColor = .systemBackground
+        activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
         getData()
+        registerCells()
         // Do any additional setup after loading the view.
     }
+    
+    // MARK: - Update CollectionView size
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        self.episodeCollectionView.snp.updateConstraints { make in
+            make.height.equalTo(episodeCollectionView.collectionViewLayout.collectionViewContentSize.height)
+        }
+    }
+    
     // MARK: - Make call for movie or serie detail from API
     func getData(){
         if let movieId = movie?.id {
@@ -132,44 +211,99 @@ class DetailVC: UIViewController {
                 let hours = runtime / 60
                 let minutes = runtime / 60 % 60
                 runtimeLabel.text = "\(hours) hours \(minutes) minutes"
-                print(detail)
+                // ImageView's image setting
+                if let posterPath = detail?.backdropPath {
+                    if let url = detail?.posterURL {
+                        self.imageView.kf.setImage(with: url)
+                    }
+                }
+                if let genres2 = detail?.genres {
+                    genres = genres2
+                    var genresName : [String] = []
+                    for i in 0..<(genres?.count ?? 0) {
+                        genresName.append(genres?[i].name ?? "")
+                    }
+                    genresLabel.text = "\(genresName.joined(separator: " • "))"
+                }
+                seasonButton.backgroundColor = .clear
+                activityIndicator.stopAnimating()
             }
         }
         else if let serieId = serie?.id {
             Task {
                 detail = try await connection.getSerieDetail(serieId: serieId)
+                episode = try await connection.getEpisodeDetail(serieId: serieId, seasonNumber: 1)
+                
                 if let numberOfSeasons = detail?.numberOfSeasons, numberOfSeasons != 1 {
                     runtimeLabel.text = "\(numberOfSeasons) Seasons"
-
+                    if let posterPath = detail?.backdropPath  {
+                        print(posterPath)
+                        if let url = detail?.posterURL {
+                            self.imageView.kf.setImage(with: url)
+                        }
+                    }
+                    if let genres2 = detail?.genres {
+                        genres = genres2
+                        var genresName : [String] = []
+                        for i in 0..<(genres?.count ?? 0) {
+                            genresName.append(genres?[i].name ?? "")
+                        }
+                        genresLabel.text = "\(genresName.joined(separator: " • "))"
+                    }
+                    menuChildren.removeAll(keepingCapacity: true)
+                    for season in 1..<(numberOfSeasons+1) {
+                        menuChildren.append(UIAction(title: "\(season). Season", handler: { _ in
+                            Task {
+                                self.episode = try await self.connection.getEpisodeDetail(serieId: serieId, seasonNumber: season)
+                                self.episodeCollectionView.reloadData()
+                            }
+                        }))
+                    }
+                    seasonButton.isHidden = false
+                    seasonButton.menu = UIMenu(options: .displayInline, children: menuChildren)
+                    seasonButton.menu?.displayPreferences = .none
+                    episodeLabel.isHidden = true
+                    episodeCollectionView.reloadData()
+                    activityIndicator.stopAnimating()
+                    
                 } else if let numberOfEpisodes = detail?.numberOfEpisodes {
                     runtimeLabel.text = "\(numberOfEpisodes) Episodes"
+                    if let posterPath = detail?.backdropPath  {
+                        print(posterPath)
+                        if let url = detail?.posterURL {
+                            self.imageView.kf.setImage(with: url)
+                        }
+                    }
+                    if let genres2 = detail?.genres {
+                        genres = genres2
+                        var genresName : [String] = []
+                        for i in 0..<(genres?.count ?? 0) {
+                            genresName.append(genres?[i].name ?? "")
+                        }
+                        genresLabel.text = "\(genresName.joined(separator: " • "))"
+                    }
+                    episodeLabel.text = "Episodes"
+                    episodeCollectionView.reloadData()
+                    activityIndicator.stopAnimating()
                 }
             }
         }
     }
+    
+    //MARK: -Register Cell for loading
+    private func registerCells() {
+        episodeCollectionView.register(EpisodesCollectionViewCell.self, forCellWithReuseIdentifier: "EpisodesCollectionViewCell")
+    }
+    
     // MARK: - Setup Views
     func setupViews(){
         view.addSubview(scrollView)
-
+        
         scrollView.addSubview(stackView)
         
-        // ImageView's image setting
-        if let posterPath = serie?.posterPath  {
-            if let url = serie?.posterURL {
-                self.imageView.kf.setImage(with: url)
-            }
-        }else if let posterPath = movie?.posterPath  {
-            if let url = movie?.posterURL {
-                self.imageView.kf.setImage(with: url)
-            }
-            
-        }
         stackView.addArrangedSubview(imageView)
-        
-        view.addSubview(view2)
-
-        view2.addSubview(playButton)
-        
+        view.addSubview(View)
+        View.addSubview(backButton)
         // Title Label text setting
         if let title = movie?.title {
             titleLabel.text = title
@@ -178,9 +312,11 @@ class DetailVC: UIViewController {
         }
         stackView.addArrangedSubview(titleLabel)
         
+        stackView.addArrangedSubview(genresLabel)
+        
         stackView.addArrangedSubview(stackView2)
         
-//      Setting datelabel text
+        //      Setting datelabel text
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd"
         if let releaseDate = movie?.releaseDate , let release = dateFormatter.date(from: releaseDate){
@@ -195,10 +331,9 @@ class DetailVC: UIViewController {
         stackView2.addArrangedSubview(dateLabel)
         
         stackView2.addArrangedSubview(runtimeLabel)
-
+        
         stackView.addArrangedSubview(playButton2)
-
-        // Description Label Text setting
+        
         if let overview = movie?.overview  {
             descriptionLabel.text = overview
         } else if let overview = serie?.overview {
@@ -206,63 +341,191 @@ class DetailVC: UIViewController {
         }
         stackView.addArrangedSubview(descriptionLabel)
         
+        if userId != "" {
+            Task{
+                if documentId != "" {
+                    if let movieId = movie?.id {
+                        let movie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").getDocument()
+                        
+                        let isExisted = movie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    } else if let serieId = serie?.id {
+                        let serie = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").getDocument()
+                        
+                        let isExisted = serie.exists
+                        
+                        if isExisted {
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        } else{
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                        
+                    }
+                }
+            }
+        } else {
+            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+        }
+        stackView.addArrangedSubview(favoriteButton)
+        
+        stackView.addArrangedSubview(episodeLabel)
+        
+        seasonButton.showsMenuAsPrimaryAction = true
+        seasonButton.changesSelectionAsPrimaryAction = true
+        seasonButton.isHidden = true
+        stackView.addArrangedSubview(seasonButton)
+        
+        episodeCollectionView.delegate = self
+        episodeCollectionView.dataSource = self
+        stackView.addArrangedSubview(episodeCollectionView)
+        
         view.addSubview(activityIndicator)
     }
     
-    // MARK: - Play Button Action method
-    @objc func playButtonAction(sender: UIButton) {
-        print("play button tapped")
+    // MARK: - Add to Favorites or Delete from Favorites
+    @objc func favoriteButtonAction(_ sender: UIButton) {
+        if favoriteButton.currentImage == UIImage(systemName: "plus") {
+            if userId != "" {
+                Task {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    let count = profile.documents.count
+                    guard count != 0 else { return }
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id, let movieImage = movie?.posterURL, let movieBackImage = detail?.posterURL{
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").setData(["movieId":movieId, "movieName": movie?.title, "movieImageURL": "\(movieImage)", "movieBackImage": "\(movieBackImage)"])
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        }else if let serieId = serie?.id, let serieImage = serie?.posterURL, let serieBackImage = detail?.posterURL {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").setData(["serieId":serieId, "serieName": serie?.name, "serieImageURL": "\(serieImage)", "serieBackImage": "\(serieBackImage)"])
+                            favoriteButton.setImage(UIImage(systemName: "checkmark"), for: .normal)
+                        }
+                    }
+                }
+            }else{
+                let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "OK", style: .cancel))
+                present(alert, animated: true)
+            }
+            
+        } else {
+            if userId != "" {
+                Task {
+                    let profile = try await db.collection("Users").document(userId).collection("Profiles").whereField("isEnabled", isEqualTo: true).getDocuments()
+                    let count = profile.documents.count
+                    guard count != 0 else { return }
+                    if let documentId = profile.documents[0].documentID as? String {
+                        if let movieId = movie?.id {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(movieId)").delete()
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }else if let serieId = serie?.id {
+                            try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").document("\(serieId)").delete()
+                            favoriteButton.setImage(UIImage(systemName: "plus"), for: .normal)
+                        }
+                    }
+                }
+            }
+        }
     }
-    
     // MARK: - Setup Constraints
     func setupConstraints(){
         scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-            make.width.equalToSuperview()
+            make.edges.equalTo(view.safeAreaLayoutGuide).inset(13)
         }
         activityIndicator.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
         stackView.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(13)
-            make.width.equalTo(scrollView).inset(13)
+            make.top.bottom.equalTo(scrollView.contentLayoutGuide)
+            make.leading.trailing.equalTo(scrollView.frameLayoutGuide)
+            make.width.equalTo(scrollView.frameLayoutGuide)
         }
-
         imageView.snp.makeConstraints { make in
-            make.width.equalTo(stackView)
+            make.width.equalToSuperview()
             make.height.equalTo(230)
         }
-        view2.snp.makeConstraints { make in
-            make.height.equalTo(50)
-            make.center.equalTo(imageView)
-            make.width.equalTo(80)
+        View.snp.makeConstraints { make in
+            make.top.equalTo(imageView).inset(5)
+            make.trailing.equalTo(imageView).inset(5)
+            make.height.width.equalTo(25)
         }
-        playButton.snp.makeConstraints { make in
+        backButton.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
- 
         titleLabel.snp.makeConstraints { make in
-            make.height.equalTo(35)
+            make.height.equalTo(18)
+        }
+        genresLabel.snp.makeConstraints { make in
+            make.height.equalTo(18)
         }
         stackView2.snp.makeConstraints { make in
-            make.height.equalTo(20)
+            make.height.equalTo(18)
         }
         dateLabel.snp.makeConstraints { make in
-            make.height.equalTo(20)
+            make.height.equalTo(18)
         }
         runtimeLabel.snp.makeConstraints { make in
-            make.height.equalTo(20)
+            make.height.equalTo(18)
         }
-
+        
         playButton2.snp.makeConstraints { make in
-            make.width.equalTo(stackView)
+            make.width.equalToSuperview()
             make.height.equalTo(40)
         }
         descriptionLabel.snp.makeConstraints { make in
             make.width.equalToSuperview()
         }
-        
+        favoriteButton.snp.makeConstraints { make in
+            make.height.equalTo(60)
+            make.width.equalTo(stackView).dividedBy(5.6)
+        }
+        episodeLabel.snp.makeConstraints { make in
+            make.height.equalTo(15)
+        }
+        seasonButton.snp.makeConstraints { make in
+            make.height.equalTo(30)
+            make.width.equalTo(stackView).dividedBy(3.4)
+        }
+        episodeCollectionView.snp.makeConstraints { make in
+            make.width.equalToSuperview()
+            make.height.equalTo(1)
+        }
     }
-
+    //MARK: Actions
+    @objc func BackButton(_ sender: UIBarButtonItem) {
+        dismiss(animated: true)
+    }
 }
 
+// MARK: - CollectionViewDelegate and DataSource Methods
+extension DetailVC: UICollectionViewDelegate, UICollectionViewDataSource {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return episode?.count ?? 1
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "EpisodesCollectionViewCell", for: indexPath) as! EpisodesCollectionViewCell
+        let episod = episode?[indexPath.row]
+        
+        if let url = episod?.stillURL {
+            cell.imageVieww.kf.setImage(with: url)
+            print(url)
+        }
+        
+        let name = episod?.name
+        let runtime = episod?.runtime
+        let overview = episod?.overview
+        
+        cell.episodeLabel.text = "\(indexPath.row + 1). \(name ?? "")"
+        cell.runtimeLabel.text = "\(runtime ?? 0) min."
+        cell.overview.text = "\(overview ?? "")"
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        print(episode?[indexPath.row].name,"bölüm")
+    }
+}
