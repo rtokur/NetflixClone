@@ -28,7 +28,7 @@ class ProfileCollectionViewCell: UICollectionViewCell {
     let label : UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 11)
-        label.textColor = .label
+        label.textColor = .white
         label.textAlignment = .center
         return label
     }()

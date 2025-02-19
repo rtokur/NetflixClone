@@ -32,7 +32,7 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
     
     let numberLabel : UILabel = {
         let label = UILabel()
-        label.textColor = .label
+        label.textColor = .white
         label.textAlignment = .center
         label.font = .boldSystemFont(ofSize: 90)
         return label
@@ -53,8 +53,6 @@ class TopRatedMovieCollectionViewCell: UICollectionViewCell {
         contentView.addSubview(view)
         view.addSubview(posterImageView2)
         view.addSubview(numberLabel)
-        
-        
     }
     
     // MARK: - Setup Constraints

@@ -39,8 +39,6 @@ class ProfileVC: UIViewController, ReloadData{
         vieww4.isHidden = true
         
         navigationItem.rightBarButtonItem?.title = "Edit"
-        
-        
     }
     
     // MARK: - Properties
@@ -104,7 +102,7 @@ class ProfileVC: UIViewController, ReloadData{
     let label1: UILabel = {
         let label = UILabel()
         label.text = "Add Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
         return label
@@ -149,7 +147,7 @@ class ProfileVC: UIViewController, ReloadData{
     let label2: UILabel = {
         let label = UILabel()
         label.text = "Add Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
         label.isHidden = true
@@ -202,7 +200,7 @@ class ProfileVC: UIViewController, ReloadData{
     let label3: UILabel = {
         let label = UILabel()
         label.text = "Add Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
         label.isHidden = true
@@ -247,7 +245,7 @@ class ProfileVC: UIViewController, ReloadData{
     let label4: UILabel = {
         let label = UILabel()
         label.text = "Add Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .systemFont(ofSize: 18)
         label.textAlignment = .center
         label.isHidden = true
@@ -258,7 +256,7 @@ class ProfileVC: UIViewController, ReloadData{
         let label = UILabel()
         label.text = "Who is watching?"
         label.font = .boldSystemFont(ofSize: 19)
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -272,7 +270,7 @@ class ProfileVC: UIViewController, ReloadData{
         navigationItem.titleView = navLabel
         navigationController?.navigationBar.isTranslucent = true
         var editButton = UIBarButtonItem(title: "Edit", style: .done, target: self, action: #selector(editButtonAction))
-        editButton.tintColor = .label
+        editButton.tintColor = .white
         navigationItem.rightBarButtonItem = editButton
     }
     
@@ -322,8 +320,6 @@ class ProfileVC: UIViewController, ReloadData{
                 }catch{
                     print(error.localizedDescription)
                 }
-                
-                
             }
         }
     }
@@ -378,7 +374,7 @@ class ProfileVC: UIViewController, ReloadData{
         
         stackView3.addArrangedSubview(stackView7)
         
-
+        
         vieww4.addSubview(pencilView4)
         stackView7.addArrangedSubview(imageView4)
         let tapView4 = UITapGestureRecognizer(target: self, action: #selector(EditProfile(_:)))
@@ -518,8 +514,8 @@ class ProfileVC: UIViewController, ReloadData{
                     try await db.collection("Users").document(userId).collection("Profiles").document(documentId).updateData(["isEnabled":true])
                     ls.image = profileUrll4
                     present(ls, animated: true)
-               }
-           }
+                }
+            }
         }
     }
     
@@ -547,7 +543,7 @@ class ProfileVC: UIViewController, ReloadData{
                     evc.documentId = documentId
                     evc.delegate = self
                     evc.userId = userId
-
+                    
                     present(evc, animated: true)
                 }
             }else if tappedView?.tag == 3{

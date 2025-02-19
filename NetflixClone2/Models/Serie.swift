@@ -8,8 +8,8 @@
 import Foundation
 class Serie: Codable {
     // MARK: - Properties
-    let id: Int?
-    let name: String?
+    var id: Int?
+    var name: String?
     let overview: String?
     let genreIds: [Int]?
     let posterPath: String?

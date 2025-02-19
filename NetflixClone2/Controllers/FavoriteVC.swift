@@ -10,7 +10,8 @@ import SnapKit
 import Kingfisher
 import FirebaseFirestore
 
-class FavoriteVC: UIViewController,UpdateCollectionView {
+class FavoriteVC: UIViewController,UpdateCollectionView{
+    
     // MARK: Methods
     func update() {
         getFavorites()
@@ -43,7 +44,7 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
     let label : UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
-        label.textColor = .label
+        label.textColor = .white
         label.font = .boldSystemFont(ofSize: 16)
         label.text = "Series and Movies"
         label.textAlignment = .left
@@ -54,7 +55,7 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
         let label = UILabel()
         label.text = "My List"
         label.font = .boldSystemFont(ofSize: 17)
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -66,11 +67,11 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
         setupViews()
         setupConstraints()
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .done, target: self, action: #selector(BackButton))
-        backButton.tintColor = .label
+        backButton.tintColor = .white
         navigationItem.leftBarButtonItem = backButton
         navigationItem.titleView = navLabel
         let editButton = UIBarButtonItem(title: "Edit", style: .done, target: self, action: #selector(editButtonAction))
-        editButton.tintColor = .label
+        editButton.tintColor = .white
         navigationItem.rightBarButtonItem = editButton
         navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
@@ -94,11 +95,11 @@ class FavoriteVC: UIViewController,UpdateCollectionView {
                     
                     for favorite in favoritess.documents {
                         if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieBackImage"] as? String, let movieId = favorite.data()["movieId"] as? Int {
-                            let favoritee = Favorite(id: movieId, URL: movieImage, name: name)
+                            let favoritee = Favorite(id: movieId, URL: movieImage, name: name, movie: true)
                             favorites.append(favoritee)
                             
                         } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieBackImage"] as? String, let serieId = favorite.data()["serieId"] as? Int {
-                            let favoritee = Favorite(id: serieId, URL: serieImage, name: name)
+                            let favoritee = Favorite(id: serieId, URL: serieImage, name: name, movie: false)
                             favorites.append(favoritee)
                         }
                     }
@@ -161,13 +162,14 @@ extension FavoriteVC : UICollectionViewDelegate,UICollectionViewDataSource {
         if let url = fav.URL {
             cell.imageView.kf.setImage(with: URL(string: url))
         }
+        
         cell.count = count
         if count % 2 == 1 {
             cell.playButton.setImage(UIImage(systemName: "trash"), for: .normal)
             cell.playButton.tintColor = .red
         } else {
             cell.playButton.setImage(UIImage(systemName: "play.circle"), for: .normal)
-            cell.playButton.tintColor = .label
+            cell.playButton.tintColor = .white
         }
         cell.movieId = fav.id!
         cell.documentId = documentId
@@ -176,5 +178,4 @@ extension FavoriteVC : UICollectionViewDelegate,UICollectionViewDataSource {
         cell.delegate = self
         return cell
     }
-    
 }

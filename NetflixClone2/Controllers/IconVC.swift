@@ -24,7 +24,7 @@ class IconVC: UIViewController {
         let label = UILabel()
         label.text = "Select Icon"
         label.font = .boldSystemFont(ofSize: 19)
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -46,7 +46,7 @@ class IconVC: UIViewController {
         let label = UILabel()
         label.text = "Classics"
         label.font = .boldSystemFont(ofSize: 17)
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -68,7 +68,7 @@ class IconVC: UIViewController {
         setupConstraints()
         navigationItem.titleView = selectLabel
         let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .done, target: self, action: #selector(BackButton))
-        backButton.tintColor = .label
+        backButton.tintColor = .white
         navigationItem.leftBarButtonItem = backButton
     }
     

@@ -8,6 +8,8 @@
 import UIKit
 
 class SearchVC: UIViewController, UISearchBarDelegate {
+
+    
     //MARK: Properties
     var count : Int = 0
     let connection = Connection()
@@ -43,7 +45,7 @@ class SearchVC: UIViewController, UISearchBarDelegate {
     let backButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "chevron.backward"), for: .normal)
-        button.tintColor = .label
+        button.tintColor = .white
         button.addTarget(self, action: #selector(BackButton), for: .touchUpInside)
         return button
     }()
@@ -52,7 +54,7 @@ class SearchVC: UIViewController, UISearchBarDelegate {
         let bar = UISearchBar()
         bar.placeholder = "Search movie or serie"
         bar.searchTextField.addTarget(self, action: #selector(searchBarTextDidBeginEditing), for: .editingChanged)
-        bar.tintColor = .label
+        bar.tintColor = .white
         return bar
     }()
     
@@ -187,9 +189,8 @@ extension SearchVC : UICollectionViewDelegate, UICollectionViewDataSource {
         }
         dvc.userId = userId
         dvc.documentId = documentId
-        let nvc = UINavigationController(rootViewController: dvc)
-        nvc.modalPresentationStyle = .fullScreen
-        nvc.isModalInPresentation = true
-        present(nvc, animated: true)
+        dvc.modalPresentationStyle = .fullScreen
+        dvc.isModalInPresentation = true
+        present(dvc, animated: true)
     }
 }

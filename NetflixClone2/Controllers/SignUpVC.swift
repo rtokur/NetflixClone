@@ -27,7 +27,7 @@ class SignUpVC: UIViewController {
         let label = UILabel()
         label.text = "Create a password to start your membership"
         label.font = .systemFont(ofSize: 38)
-        label.tintColor = .label
+        label.tintColor = .white
         label.lineBreakMode = .byWordWrapping
         label.numberOfLines = 3
         return label
@@ -36,7 +36,7 @@ class SignUpVC: UIViewController {
     let emailText: UITextField = {
         let text = UITextField()
         text.placeholder = "E-post"
-        text.textColor = .label
+        text.textColor = .white
         text.textContentType = .emailAddress
         text.backgroundColor = .systemGray5
         text.layer.cornerRadius = 6
@@ -50,7 +50,7 @@ class SignUpVC: UIViewController {
     let passwordText: UITextField = {
         let text = UITextField()
         text.placeholder = "Add a password"
-        text.textColor = .label
+        text.textColor = .white
         text.textContentType = .newPassword
         text.backgroundColor = .systemGray5
         text.layer.cornerRadius = 6
@@ -65,7 +65,7 @@ class SignUpVC: UIViewController {
         let button = UIButton()
         button.layer.cornerRadius = 6
         button.setTitle("Sign Up", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .red
         button.titleLabel?.font = .boldSystemFont(ofSize: 20)
         button.addTarget(self, action: #selector(SignUpButton), for: .touchUpInside)

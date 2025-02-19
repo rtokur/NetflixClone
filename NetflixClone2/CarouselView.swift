@@ -17,6 +17,8 @@ protocol MakeAlert2: AnyObject {
 }
 
 class CarouselView: UIView, UICollectionViewDelegate, MakeAlert {
+
+    
     func makeAlert() {
         delegate2?.makeAlert2()
     }

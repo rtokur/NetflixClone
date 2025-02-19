@@ -29,7 +29,8 @@ class MainTabBarViewController: UITabBarController{
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        viewDidLoad()
+        super.viewWillAppear(animated)
+        setupViews()
     }
     
     // MARK: - Setup Methods
@@ -54,7 +55,7 @@ class MainTabBarViewController: UITabBarController{
             vc2.title = "Search"
             vc3.title = "Login"
             
-            tabBar.tintColor = .label
+            tabBar.tintColor = .white
             
             if userId != "" {
                 let hvc = HomeVC()
@@ -67,16 +68,28 @@ class MainTabBarViewController: UITabBarController{
                 vc2.documentId = documentId
                 vc2.userId = userId
                 let mpvc3 = MyProfileVC()
-                let data = try! Data(contentsOf: URL(string: profileImageURL)!)
-                let image = UIImage(data: data)
-                let resized = image?.resize(25, 25).withRenderingMode(.alwaysOriginal)
-                mpvc3.profileImage = profileImageURL
-                mpvc3.profileName = profileName
-                mpvc3.userId = userId
-                mpvc3.documentId = documentId
-                vc3 = UINavigationController(rootViewController: mpvc3)
-                vc3.tabBarItem.image = resized
-                vc3.title = profileName
+                if let url = URL(string: profileImageURL) {
+                    mpvc3.profileImage = profileImageURL
+                    mpvc3.profileName = profileName
+                    mpvc3.userId = userId
+                    mpvc3.documentId = documentId
+                    vc3 = UINavigationController(rootViewController: mpvc3)
+                    vc3.title = profileName
+                    let task = URLSession.shared.dataTask(with: URLRequest(url: url)) { data, response, error in
+                        guard let data else { return }
+
+                        do {
+                            let image = UIImage(data: data)
+                            let resized = image?.resize(25, 25).withRenderingMode(.alwaysOriginal)
+                            DispatchQueue.main.async {
+                                vc3.tabBarItem.image = resized
+                            }
+                        }catch {
+                            print(error.localizedDescription)
+                        }
+                    }
+                    task.resume()
+                }
             }
             setViewControllers([vc1,vc2,vc3], animated: true)
             activityIndicator.stopAnimating()

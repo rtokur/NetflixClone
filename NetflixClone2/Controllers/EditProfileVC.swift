@@ -51,7 +51,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
     let cancelButton: UIButton = {
         let button = UIButton()
         button.setTitle("Cancel", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 15)
         button.isEnabled = true
         button.addTarget(self, action: #selector(cancelButtonAction), for: .touchUpInside)
@@ -61,7 +61,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
     let profileLabel: UILabel = {
         let label = UILabel()
         label.text = "Add Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .boldSystemFont(ofSize: 20)
         label.textAlignment = .center
         return label
@@ -90,7 +90,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
         button.setImage(UIImage(systemName: "pencil.circle.fill"), for: .normal)
         button.backgroundColor = .clear
         button.isEnabled = true
-        button.tintColor = .label
+        button.tintColor = .white
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
@@ -101,7 +101,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
     let nameText: UITextField = {
         let text = UITextField()
         text.placeholder = "Profile Name"
-        text.textColor = .label
+        text.textColor = .white
         text.tintColor = .systemGray3
         text.layer.cornerRadius = 5
         text.borderStyle = .roundedRect
@@ -140,7 +140,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
             saveButton.setTitleColor(.lightGray, for: .normal)
         } else{
             saveButton.isEnabled = true
-            saveButton.setTitleColor(.label, for: .normal)
+            saveButton.setTitleColor(.white, for: .normal)
         }
     }
     
@@ -219,7 +219,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
                 saveButton.setTitleColor(.lightGray, for: .normal)
             } else{
                 saveButton.isEnabled = true
-                saveButton.setTitleColor(.label, for: .normal)
+                saveButton.setTitleColor(.white, for: .normal)
             }
         } else {
             if textField.text == "" {
@@ -227,7 +227,7 @@ class EditProfileVC: UIViewController,ReLoadImage {
                 saveButton.setTitleColor(.lightGray, for: .normal)
             }else{
                 saveButton.isEnabled = true
-                saveButton.setTitleColor(.label, for: .normal)
+                saveButton.setTitleColor(.white, for: .normal)
             }
         }
         

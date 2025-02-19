@@ -74,17 +74,17 @@ class MyProfileVC: UIViewController {
         let label = UILabel()
         label.text = "My List"
         label.font = .boldSystemFont(ofSize: 16)
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
     let listButton: UIButton = {
         let button = UIButton()
         button.setTitle("Show All", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(FavoriteAction), for: .touchUpInside)
         button.setImage(UIImage(systemName: "chevron.forward"), for: .normal)
-        button.tintColor = .label
+        button.tintColor = .white
         button.titleEdgeInsets.left = -20
         button.imageEdgeInsets.right = -130
         button.titleLabel?.font = .systemFont(ofSize: 14)
@@ -111,23 +111,25 @@ class MyProfileVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
-        searchButton.tintColor = .label
+        searchButton.tintColor = .white
         let moreButton = UIBarButtonItem(image: UIImage(systemName: "line.3.horizontal"), style: .done, target: self, action: #selector(moreButton))
-        moreButton.tintColor = .label
+        moreButton.tintColor = .white
         navigationItem.rightBarButtonItems = [moreButton,searchButton]
         let label = UIBarButtonItem(title: "My Netflix", style: .done, target: nil, action: nil)
-        label.tintColor = .label
+        label.tintColor = .white
         navigationItem.leftBarButtonItem = label
         navigationController?.navigationBar.isTranslucent = true
         activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
-        getFavorites()
+
         // Do any additional setup after loading the view.
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+        
+        getFavorites()
     }
     
     // MARK: - Setup Methods
@@ -202,18 +204,18 @@ class MyProfileVC: UIViewController {
     
     // MARK: - Get Favorites from firebase
     func getFavorites(){
+        favorites.removeAll()
         Task{
-            favorites.removeAll()
             let favorite = try await db.collection("Users").document(userId).collection("Profiles").document(documentId).collection("Favorites").getDocuments()
             let count = favorite.documents.count
             guard count != 0 else { return }
             for favorite in favorite.documents {
                 if let name = favorite.data()["movieName"] as? String, let movieImage = favorite.data()["movieImageURL"] as? String, let movieId = favorite.data()["movieId"] as? Int {
-                    let favoritee = Favorite(id: movieId, URL: movieImage, name: name)
+                    let favoritee = Favorite(id: movieId, URL: movieImage, name: name, movie: true)
                     favorites.append(favoritee)
                     
                 } else if let name = favorite.data()["serieName"] as? String, let serieImage = favorite.data()["serieImageURL"] as? String, let serieId = favorite.data()["serieId"] as? Int {
-                    let favoritee = Favorite(id: serieId, URL: serieImage, name: name)
+                    let favoritee = Favorite(id: serieId, URL: serieImage, name: name, movie: false)
                     favorites.append(favoritee)
                 }
             }

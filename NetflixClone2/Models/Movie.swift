@@ -8,8 +8,8 @@
 import Foundation
 class Movie: Codable {
     // MARK: - Properties
-    let id: Int?
-    let title:String?
+    var id: Int?
+    var title:String?
     let overview:String?
     let releaseDate:String?
     let posterPath:String?

@@ -9,6 +9,7 @@ import SnapKit
 import Kingfisher
 
 class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
+    
     func makeAlert2() {
         let alert = UIAlertController(title: "Error", message: "Please, login to add favorite", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .cancel))
@@ -21,10 +22,9 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
         dVC.movie = upcoming
         dVC.userId = userId
         dVC.documentId = documentId
-        let nvc = UINavigationController(rootViewController: dVC)
-        nvc.modalPresentationStyle = .fullScreen
-        nvc.isModalInPresentation = true
-        present(nvc, animated: true)
+        dVC.modalPresentationStyle = .fullScreen
+        dVC.isModalInPresentation = true
+        present(dVC, animated: true)
     }
     
     // MARK: - Properties
@@ -88,7 +88,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
     
     private let popularTitleLabel : UILabel = {
         let popularTitleLabel = UILabel()
-        popularTitleLabel.textColor = .label
+        popularTitleLabel.textColor = .white
         popularTitleLabel.numberOfLines = 1
         popularTitleLabel.textAlignment = .left
         popularTitleLabel.font = .boldSystemFont(ofSize: 17)
@@ -105,7 +105,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
     
     private let topRatedTitleLabel : UILabel = {
         let topRatedTitleLabel = UILabel()
-        topRatedTitleLabel.textColor = .label
+        topRatedTitleLabel.textColor = .white
         topRatedTitleLabel.numberOfLines = 1
         topRatedTitleLabel.textAlignment = .left
         topRatedTitleLabel.font = .boldSystemFont(ofSize: 17)
@@ -115,7 +115,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
     
     private let popularSerieTitleLabel : UILabel = {
         let popularSerieTitleLabel = UILabel()
-        popularSerieTitleLabel.textColor = .label
+        popularSerieTitleLabel.textColor = .white
         popularSerieTitleLabel.numberOfLines = 1
         popularSerieTitleLabel.textAlignment = .left
         popularSerieTitleLabel.font = .boldSystemFont(ofSize: 17)
@@ -125,7 +125,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
     
     let nameLabel : UILabel = {
         let label = UILabel()
-        label.textColor = .label
+        label.textColor = .white
         label.font = .boldSystemFont(ofSize: 23)
         return label
     }()
@@ -136,11 +136,11 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
         // Do any additional setup after loading the view.
         if userId != "" {
             let label = UIBarButtonItem(title: "For \(profileName)", style: .done, target: nil, action: nil)
-            label.tintColor = .label
+            label.tintColor = .white
             navigationItem.leftBarButtonItem = label
         }
         let searchButton = UIBarButtonItem(image: UIImage(systemName: "magnifyingglass"), style: .done, target: self, action: #selector(searchButton))
-        searchButton.tintColor = .label
+        searchButton.tintColor = .white
         navigationItem.rightBarButtonItems = [searchButton]
         navigationController?.navigationBar.isTranslucent = true
         activityIndicator.startAnimating()
@@ -167,6 +167,7 @@ class HomeVC: UIViewController, CarouselViewDelegate, MakeAlert2{
         Task {
             popularMovies = try await connection.getPopularMovies()
             popularSeries = try await connection.getPopularSeries()
+            popularSeries = popularSeries + popularSeries + popularSeries + popularSeries + popularSeries + popularSeries + popularSeries
             upComing = try await connection.getUpComingMovies()
             topRated = try await connection.getTopRatedMovies()
             genres = try await connection.getGenresMovie()
@@ -315,10 +316,9 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
             dVC.serie = popularSeries[indexPath.row]
             dVC.userId = userId
             dVC.documentId = documentId
-            let nvc = UINavigationController(rootViewController: dVC)
-            nvc.modalPresentationStyle = .fullScreen
-            nvc.isModalInPresentation = true
-            self.present(nvc, animated: true, completion: nil)
+            dVC.modalPresentationStyle = .fullScreen
+            dVC.isModalInPresentation = true
+            self.present(dVC, animated: true, completion: nil)
         }else{
             if collectionView == topRatedCollectionView {
                 dVC.movie = topRated[indexPath.row]
@@ -330,10 +330,9 @@ extension HomeVC : UICollectionViewDelegate,UICollectionViewDataSource {
                 dVC.userId = userId
                 dVC.documentId = documentId
             }
-            let nvc = UINavigationController(rootViewController: dVC)
-            nvc.modalPresentationStyle = .fullScreen
-            nvc.isModalInPresentation = true
-            self.present(nvc, animated: true, completion: nil)
+            dVC.modalPresentationStyle = .fullScreen
+            dVC.isModalInPresentation = true
+            self.present(dVC, animated: true, completion: nil)
         }
     }
     

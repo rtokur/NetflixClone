@@ -12,13 +12,16 @@ import FirebaseFirestore
 protocol UpdateCollectionView: AnyObject {
     func update()
 }
-class FavoriteCollectionViewCell: UICollectionViewCell {
+
+class FavoriteCollectionViewCell: UICollectionViewCell{
+    
+    
     // MARK: - UI Elements
     let titleLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 13)
         label.textAlignment = .left
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -62,9 +65,7 @@ class FavoriteCollectionViewCell: UICollectionViewCell {
     }
     // MARK: - Button Action
     @objc func playButtonAction(_ sender: UIButton) {
-        if playButton.tintColor == .label {
-            print("play")
-        } else if playButton.tintColor == .red {
+        if playButton.tintColor == .red {
             if userId != "" {
                 if documentId != "" {
                     if movieId != 0 {

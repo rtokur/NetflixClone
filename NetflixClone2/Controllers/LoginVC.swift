@@ -25,7 +25,7 @@ class LoginVC: UIViewController {
     let emailText: UITextField = {
         let text = UITextField()
         text.placeholder = "E-post or phone number"
-        text.tintColor = .label
+        text.tintColor = .white
         text.textContentType = .emailAddress
         text.backgroundColor = .systemGray5
         text.layer.cornerRadius = 6
@@ -40,7 +40,7 @@ class LoginVC: UIViewController {
         let text = UITextField()
         text.placeholder = "Password"
         text.textContentType = .password
-        text.tintColor = .label
+        text.tintColor = .white
         text.backgroundColor = .systemGray5
         text.layer.cornerRadius = 6
         let paddingView = UIView(frame: CGRectMake(0, 0, 15, text.frame.height))
@@ -53,7 +53,7 @@ class LoginVC: UIViewController {
     let signInButton: UIButton = {
         let button = UIButton()
         button.setTitle("Sign In", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.backgroundColor = .red
         button.layer.cornerRadius = 6
         button.titleLabel?.font = .boldSystemFont(ofSize: 15)
@@ -76,7 +76,7 @@ class LoginVC: UIViewController {
         let button = UIButton()
         button.backgroundColor = .black
         button.setTitle("Click to create a Netflix account", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.layer.cornerRadius = 5
         button.layer.borderWidth = 1
         button.layer.borderColor = UIColor .systemPink.cgColor

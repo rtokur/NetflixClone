@@ -36,7 +36,6 @@ class SearchCollectionViewCell: UICollectionViewCell {
     
     let button: UIButton = {
         let button = UIButton()
-        button.addTarget(self, action: #selector(playButtonAction(_:)), for: .touchUpInside)
         button.contentVerticalAlignment = .fill
         button.contentHorizontalAlignment = .fill
         button.imageEdgeInsets = UIEdgeInsets(top: 15, left: 15, bottom: 15, right: 15)
@@ -81,8 +80,5 @@ class SearchCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    //MARK: Actions
-    @objc func playButtonAction(_ sender: UIButton) {
-        print("play")
-    }
+
 }

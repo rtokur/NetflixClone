@@ -98,6 +98,7 @@ class LaunchScreen : UIViewController {
             activityIndicator.isHidden = false
             activityIndicator.snp.makeConstraints { make in
                 make.top.equalTo(imageView.snp.bottom)
+                make.centerX.equalTo(view.safeAreaLayoutGuide)
             }
         }
     }

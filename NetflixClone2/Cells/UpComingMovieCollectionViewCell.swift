@@ -58,7 +58,6 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         playButton.titleLabel?.font = .boldSystemFont(ofSize: 13)
         playButton.setTitleColor(.black, for: UIControl.State.normal)
         playButton.layer.cornerRadius = 3
-        playButton.addTarget(self, action: #selector(playButtonAction), for: .touchUpInside)
         playButton.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 10)
         playButton.titleEdgeInsets = UIEdgeInsets(top: 0, left: 10, bottom: 0, right: 0)
         return playButton
@@ -90,7 +89,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
         label.font = .systemFont(ofSize: 13)
         label.numberOfLines = 0
         label.textAlignment = .center
-        label.textColor = .label
+        label.textColor = .white
         return label
     }()
     
@@ -200,11 +199,7 @@ class UpComingMovieCollectionViewCell: UICollectionViewCell {
             delegate?.makeAlert()
         }
     }
-    
-    // MARK: - Play Button Action method
-    @objc func playButtonAction(sender: UIButton!) {
-        print("playbuttontapped")
-    }
+
     
     // MARK: - Configure ImageView
     func configure(url: URL?) {

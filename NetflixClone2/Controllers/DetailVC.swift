@@ -61,7 +61,7 @@ class DetailVC: UIViewController {
     
     let playButton2 : UIButton = {
         let playButton2 = UIButton()
-        playButton2.backgroundColor = .label
+        playButton2.backgroundColor = .white
         playButton2.setImage(UIImage(systemName: "play.fill"), for: UIControl.State.normal)
         playButton2.tintColor = .systemBackground
         playButton2.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 15)
@@ -76,7 +76,7 @@ class DetailVC: UIViewController {
         let button = UIButton()
         button.backgroundColor = .systemBackground
         button.setTitle("My List", for: .normal)
-        button.setTitleColor(.label, for: .normal)
+        button.setTitleColor(.white, for: .normal)
         button.contentVerticalAlignment = .center
         button.contentHorizontalAlignment = .center
         button.setImage(UIImage(systemName: "plus"), for: .normal)
@@ -85,7 +85,7 @@ class DetailVC: UIViewController {
         button.addTarget(self, action: #selector(favoriteButtonAction), for: .touchUpInside)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: -40)
         button.titleEdgeInsets = UIEdgeInsets(top: 38, left: -20, bottom: 0, right: 0)
-        button.tintColor = .label
+        button.tintColor = .white
         return button
     }()
     
@@ -160,6 +160,19 @@ class DetailVC: UIViewController {
         collectionView.showsVerticalScrollIndicator = false
         return collectionView
     }()
+    
+    let View: UIView = {
+        let view = UIView()
+        return view
+    }()
+    
+    let backButton: UIButton = {
+        let button = UIButton()
+        button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
+        button.tintColor = .black
+        button.addTarget(self, action: #selector(BackButton), for: .touchUpInside)
+        return button
+    }()
     // MARK: - Empty Objects
     var movie : Movie?
     var serie : Serie?
@@ -171,18 +184,12 @@ class DetailVC: UIViewController {
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         view.backgroundColor = .systemBackground
         activityIndicator.startAnimating()
         setupViews()
         setupConstraints()
         getData()
         registerCells()
-        
-        let backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.backward"), style: .done, target: self, action: #selector(BackButton))
-        backButton.tintColor = .label
-        navigationItem.leftBarButtonItem = backButton
-        navigationController?.navigationBar.isTranslucent = true
         // Do any additional setup after loading the view.
     }
     
@@ -295,7 +302,8 @@ class DetailVC: UIViewController {
         scrollView.addSubview(stackView)
         
         stackView.addArrangedSubview(imageView)
-        
+        view.addSubview(View)
+        View.addSubview(backButton)
         // Title Label text setting
         if let title = movie?.title {
             titleLabel.text = title
@@ -379,11 +387,6 @@ class DetailVC: UIViewController {
         view.addSubview(activityIndicator)
     }
     
-    // MARK: - Play Button Action method
-    @objc func playButtonAction(sender: UIButton) {
-        print("play button tapped")
-    }
-    
     // MARK: - Add to Favorites or Delete from Favorites
     @objc func favoriteButtonAction(_ sender: UIButton) {
         if favoriteButton.currentImage == UIImage(systemName: "plus") {
@@ -443,6 +446,14 @@ class DetailVC: UIViewController {
         imageView.snp.makeConstraints { make in
             make.width.equalToSuperview()
             make.height.equalTo(230)
+        }
+        View.snp.makeConstraints { make in
+            make.top.equalTo(imageView).inset(5)
+            make.trailing.equalTo(imageView).inset(5)
+            make.height.width.equalTo(25)
+        }
+        backButton.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
         }
         titleLabel.snp.makeConstraints { make in
             make.height.equalTo(18)

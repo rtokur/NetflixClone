@@ -36,8 +36,8 @@ class MoreVC: UIViewController {
         button.setTitle("Profile Management", for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
         button.setImage(UIImage(systemName: "pencil"), for: .normal)
-        button.tintColor = .label
-        button.setTitleColor(.label, for: .normal)
+        button.tintColor = .white
+        button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(profileButton(_:)), for: .touchUpInside)
         button.titleEdgeInsets.left = -150
         button.imageEdgeInsets.left = -160
@@ -47,7 +47,7 @@ class MoreVC: UIViewController {
     let closeButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        button.tintColor = .label
+        button.tintColor = .white
         button.addTarget(self, action: #selector(closeButton(_:)), for: .touchUpInside)
         return button
     }()
@@ -57,8 +57,8 @@ class MoreVC: UIViewController {
         button.setTitle("Sign Out", for: .normal)
         button.titleLabel?.font = .boldSystemFont(ofSize: 17)
         button.setImage(UIImage(systemName: "rectangle.portrait.and.arrow.right"), for: .normal)
-        button.tintColor = .label
-        button.setTitleColor(.label, for: .normal)
+        button.tintColor = .white
+        button.setTitleColor(.white, for: .normal)
         button.addTarget(self, action: #selector(signOutButton(_:)), for: .touchUpInside)
         button.titleEdgeInsets.left = -270
         button.imageEdgeInsets.left = -280

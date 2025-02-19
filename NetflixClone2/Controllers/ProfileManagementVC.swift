@@ -40,7 +40,7 @@ class ProfileManagementVC: UIViewController, ReloadData {
     let label : UILabel = {
         let label = UILabel()
         label.text = "Change Profile"
-        label.textColor = .label
+        label.textColor = .white
         label.font = .boldSystemFont(ofSize: 20)
         label.textAlignment = .left
         return label
@@ -49,7 +49,7 @@ class ProfileManagementVC: UIViewController, ReloadData {
     let closeButton: UIButton = {
         let button = UIButton()
         button.setImage(UIImage(systemName: "xmark.circle.fill"), for: .normal)
-        button.tintColor = .label
+        button.tintColor = .white
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
         button.addTarget(self, action: #selector(closeButton(_:)), for: .touchUpInside)
         return button
@@ -67,7 +67,7 @@ class ProfileManagementVC: UIViewController, ReloadData {
     let profileButton: UIButton = {
         let button = UIButton()
         button.setTitle("Profile Management", for: .normal)
-        button.tintColor = .label
+        button.tintColor = .white
         button.setImage(UIImage(systemName: "pencil"), for: .normal)
         button.addTarget(self, action: #selector(profileAction), for: .touchUpInside)
         button.titleLabel?.font = .boldSystemFont(ofSize: 15)

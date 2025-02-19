@@ -9,13 +9,15 @@ import Foundation
 
 class Favorite: Codable {
     // MARK: - Properties
-    var id: Int? = nil
-    var URL: String? = nil
-    var name: String? = nil
+    var id: Int?
+    var URL: String?
+    var name: String?
+    var movie: Bool? 
     
-    init(id: Int, URL: String, name: String) {
+    init(id: Int, URL: String, name: String, movie: Bool) {
         self.id = id
         self.URL = URL
         self.name = name
+        self.movie = movie
     }
 }
