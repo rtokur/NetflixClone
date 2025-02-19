@@ -7,9 +7,14 @@
 
 import Foundation
 class Connection {
+
+    // MARK: - Properties
+    private let bareerToken: String = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+    private let baseUrl: String = "https://api.themoviedb.org/3"
+    
     // MARK: - Creating url for movies with path
     func createUrlMovie(path:String) async throws -> MovieResponse {
-        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+        let url = URL(string: baseUrl + path)!
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
           URLQueryItem(name: "language", value: "en-US"),
@@ -22,7 +27,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+          "Authorization": bareerToken
         ]
 
         let (data, respons) = try await URLSession.shared.data(for: request)
@@ -35,7 +40,7 @@ class Connection {
     }
     // MARK: - Creating url for series with path
     func createUrlSerie(path:String) async throws -> SerieResponse {
-        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+        let url = URL(string: baseUrl + path)!
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
@@ -49,7 +54,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+          "Authorization": bareerToken
         ]
 
         let (data, respons) = try await URLSession.shared.data(for: request)
@@ -61,7 +66,7 @@ class Connection {
     }
     // MARK: - Creating url detail for selected movie or serie with path
     func createUrlDetail(path:String) async throws -> Detail {
-        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+        let url = URL(string: baseUrl + path)!
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
@@ -75,7 +80,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+          "Authorization": bareerToken
         ]
 
         let (data, respons) = try await URLSession.shared.data(for: request)
@@ -89,7 +94,7 @@ class Connection {
     }
     // MARK: - Creating url detail for selected serie episodes with path
     func createUrlEpisodes(path: String) async throws -> EpisodeResponse {
-        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+        let url = URL(string: baseUrl + path)!
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
@@ -102,7 +107,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+          "Authorization": bareerToken
         ]
 
         let (data, respons) = try await URLSession.shared.data(for: request)
@@ -116,7 +121,7 @@ class Connection {
     }
     // MARK: - Creating url genres for movies with path
     func createUrlGenres(path:String) async throws -> GenreResponse {
-        let url = URL(string: "https://api.themoviedb.org/3"+path)!
+        let url = URL(string: baseUrl + path)!
 
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
@@ -129,7 +134,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
           "accept": "application/json",
-          "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+          "Authorization": bareerToken
         ]
 
         let (data, respons) = try await URLSession.shared.data(for: request)
@@ -144,7 +149,7 @@ class Connection {
     
     // MARK: - Creating url search for movies with path
     func createUrlSearchMovie(value: String) async throws -> MovieResponse {
-        let url = URL(string: "https://api.themoviedb.org/3/search/movie")!
+        let url = URL(string: "\(baseUrl)/search/movie")!
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
             URLQueryItem(name: "query", value: value),
@@ -159,7 +164,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
             "accept": "application/json",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+            "Authorization": bareerToken
         ]
         
         let (data, response) = try await URLSession.shared.data(for: request)
@@ -173,7 +178,7 @@ class Connection {
     
     // MARK: - Creating url search for series with path
     func createUrlSearchSerie(value: String) async throws -> SerieResponse {
-        let url = URL(string: "https://api.themoviedb.org/3/search/tv")!
+        let url = URL(string: "\(baseUrl)/search/tv")!
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)!
         let queryItems: [URLQueryItem] = [
             URLQueryItem(name: "query", value: value),
@@ -188,7 +193,7 @@ class Connection {
         request.timeoutInterval = 10
         request.allHTTPHeaderFields = [
             "accept": "application/json",
-            "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxMTkwNGQzZTNhMWFjMjM0ZWVkZGNkM2JjMGQzZmY0MCIsIm5iZiI6MTczNzk5MTUzMS40MzkwMDAxLCJzdWIiOiI2Nzk3YTU2YjBhMzBkNmQwNTkyNDFkZmQiLCJzY29wZXMiOlsiYXBpX3JlYWQiXSwidmVyc2lvbiI6MX0.INlafD8n0JNusAK0r_0vDOZ24fQx7KwqhEV-Yc5py40"
+            "Authorization": bareerToken
         ]
         
         let (data, response) = try await URLSession.shared.data(for: request)
