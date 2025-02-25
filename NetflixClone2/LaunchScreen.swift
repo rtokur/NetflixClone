@@ -61,18 +61,16 @@ class LaunchScreen : UIViewController {
                     mvc.profileImageURL = profileImage
                     mvc.userId = userId
                     mvc.documentId = documentId
-                    let nvc = UINavigationController(rootViewController: mvc)
                     
                     if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                        sceneDelegate.window?.rootViewController = nvc
+                        sceneDelegate.window?.rootViewController = mvc
                     }
                 }
             }
         } else {
             let mvc = MainTabBarViewController()
-            let nvc = UINavigationController(rootViewController: mvc)
             if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
-                sceneDelegate.window?.rootViewController = nvc
+                sceneDelegate.window?.rootViewController = mvc
             }
         }
     }
