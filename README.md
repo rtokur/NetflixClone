@@ -31,9 +31,9 @@ A **Netflix-inspired streaming app** built with **Swift**, using **Firebase** fo
 <img src="https://github.com/user-attachments/assets/1ef83445-929e-4dce-a99a-2f012842316d" width="300">
 <img src="https://github.com/user-attachments/assets/561efa73-5a5a-432d-90f3-5913d06e5bb2" width="300">
 <img src="https://github.com/user-attachments/assets/9fa2cd38-4658-42c7-a45f-7fecb7bc9626" width="300">
-<img src="https://github.com/user-attachments/assets/11e9f907-6c6b-4a39-89bf-50187ba071c0" width="300">
-<img src="https://github.com/user-attachments/assets/b869ad76-2249-4d11-ab50-4d9f053246a9" width="300">
 <img src="https://github.com/user-attachments/assets/8655d5fc-3db9-4f44-b42b-12cc454fa9ae" width="300">
+<img src="https://github.com/user-attachments/assets/b869ad76-2249-4d11-ab50-4d9f053246a9" width="300">
+<img src="https://github.com/user-attachments/assets/11e9f907-6c6b-4a39-89bf-50187ba071c0" width="300">
 
 ## 🛠️ Technologies Used  
 - **Swift (UIKit)**  
